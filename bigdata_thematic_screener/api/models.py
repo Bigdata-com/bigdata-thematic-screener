@@ -1,0 +1,156 @@
+from datetime import date, datetime, timedelta
+from enum import StrEnum
+from typing import List, Optional
+
+from pydantic import BaseModel, Field, model_validator
+
+
+class DocumentTypeEnum(StrEnum):
+    ALL = "ALL"
+    FILINGS = "FILINGS"
+    TRANSCRIPTS = "TRANSCRIPTS"
+    NEWS = "NEWS"
+    FILES = "FILES"
+
+
+def two_months_ago() -> date:
+    return date.today() - timedelta(days=60)
+
+
+def yesterday() -> date:
+    return date.today() - timedelta(days=1)
+
+
+class FrequencyEnum(StrEnum):
+    daily = "D"
+    weekly = "W"
+    monthly = "M"
+    quarterly = "3M"
+    yearly = "Y"
+
+
+class ThematicScreenRequest(BaseModel):
+    theme: str = Field(
+        ...,
+        example="Supply Chain Reshaping",
+        description="The central concept to explore.",
+    )
+    company_universe: Optional[List[str]] = Field(
+        default=None,
+        description="List of RavenPack entity IDs representing the companies to screen. Required if 'watchlist_id' is not provided.",
+        example=["4A6F00", "D8442A"],
+    )
+    watchlist_id: Optional[str] = Field(
+        default=None,
+        description="ID of a watchlist containing companies to analyze. Required if 'company_universe' is not provided.",
+        example="44118802-9104-4265-b97a-2e6d88d74893",
+    )
+    start_date: str = Field(
+        description="Start date of the analysis window (format: YYYY-MM-DD).",
+        example="2024-01-01",
+    )
+    end_date: str = Field(
+        default=yesterday().isoformat(),
+        description="End date of the analysis window (format: YYYY-MM-DD).",
+        example="2024-12-31",
+    )
+    llm_model: str = Field(
+        default="openai::gpt-4o-mini",
+        description="LLM model identifier used for taxonomy creation and semantic analysis.",
+    )
+    fiscal_year: int | None = Field(
+        description="If the document type is transcripts or filings, fiscal year needs to be specified.",
+        example=2024,
+    )
+
+    document_type: DocumentTypeEnum = Field(
+        default=DocumentTypeEnum.TRANSCRIPTS,
+        description="Type of documents to analyze (e.g., NEWS, TRANSCRIPT, FILING).",
+    )
+    rerank_threshold: Optional[float] = Field(
+        default=None,
+        description="Optional threshold (0-1) to rerank and filter search results by relevance.",
+    )
+    frequency: FrequencyEnum = Field(
+        default=FrequencyEnum.monthly,
+        description="Search frequency interval. Supported values: D (daily), W (weekly), M (monthly), Y (yearly).",
+    )
+    document_limit: int = Field(
+        default=100,
+        description="Maximum number of documents to retrieve per query to Bigdata API.",
+    )
+    batch_size: int = Field(
+        default=10,
+        description="Number of entities to include in each batch for parallel querying.",
+    )
+
+    @model_validator(mode="before")
+    def check_company_source(cls, values):
+        if not values.get("company_universe") and not values.get("watchlist_id"):
+            raise ValueError(
+                "You must provide either 'company_universe' or 'watchlist_id'"
+            )
+        return values
+
+    @model_validator(mode="before")
+    def check_date_range(cls, values):
+        try:
+            start_date = values["start_date"]
+            end_date = values["end_date"]
+            if (
+                start_date > end_date
+            ):  # We can compare directly as they are both ISO format strings
+                raise ValueError("start_date must be earlier than end_date")
+        except Exception as e:
+            raise ValueError(f"Invalid date format or range: {e}")
+        return values
+
+    @model_validator(mode="before")
+    def check_fiscal_year_when_transcript_or_filing(cls, values):
+        doc_type = values.get("document_type", None)
+        if doc_type is None:
+            raise ValueError("document_type must be specified.")
+        if doc_type.upper() not in DocumentTypeEnum.__members__:
+            raise ValueError(
+                f"Invalid document_type: {doc_type}, possible values are: {list(DocumentTypeEnum.__members__.keys())}"
+            )
+        doc_type = DocumentTypeEnum[doc_type.upper()]
+        if doc_type in [
+            DocumentTypeEnum.TRANSCRIPTS,
+            DocumentTypeEnum.FILINGS,
+        ] and not values.get("fiscal_year"):
+            raise ValueError(
+                "fiscal_year must be specified when document_type is TRANSCRIPT or FILING."
+            )
+        elif (
+            doc_type
+            and doc_type
+            not in [
+                DocumentTypeEnum.TRANSCRIPTS,
+                DocumentTypeEnum.FILINGS,
+            ]
+            and values.get("fiscal_year") is not None
+        ):
+            raise ValueError(
+                "fiscal_year must not be specified when document_type is not TRANSCRIPT or FILING."
+            )
+        return values
+
+    @model_validator(mode="before")
+    def check_frequency_vs_date_range(cls, values):
+        start_date = values["start_date"]
+        end_date = values["end_date"]
+        freq = values.get("frequency")
+        delta_days = (
+            datetime.fromisoformat(end_date) - datetime.fromisoformat(start_date)
+        ).days + 1  # Adjust for inclusive range
+        freq_min_days = {"D": 1, "W": 7, "M": 30, "3M": 90, "Y": 365}
+        if isinstance(freq, str):
+            freq = FrequencyEnum(freq)
+        if not isinstance(freq, FrequencyEnum):
+            raise ValueError(f"Invalid frequency: {freq}")
+        if delta_days < freq_min_days[freq.value]:
+            raise ValueError(
+                f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
+            )
+        return values

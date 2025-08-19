@@ -1,0 +1,17 @@
+version: 2
+multi-ecosystem-groups:
+  thematic-screener-service:
+    schedule:
+      interval: "cron"
+      cronob: "0 8 * * 1" # "At 08:00 on Monday."
+updates:
+  - package-ecosystem: "uv"
+    multi-ecosystem-group: "thematic-screener-service"
+    directory: "/"
+    patterns: ["bigdata-client", "bigdata-research-tools"]
+    allow:
+      - dependency-name: "bigdata-client"
+  - package-ecosystem: "docker"
+    multi-ecosystem-group: "thematic-screener-service"
+    directory: "/"
+    patterns: ["*"]

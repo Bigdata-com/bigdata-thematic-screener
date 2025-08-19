@@ -1,0 +1,116 @@
+import pytest
+
+from bigdata_thematic_screener.api.models import (
+    DocumentTypeEnum,
+    FrequencyEnum,
+    ThematicScreenRequest,
+)
+
+
+@pytest.mark.parametrize(
+    "theme,company_universe,watchlist_id,start_date,end_date,llm_model,fiscal_year,document_type,rerank_threshold,frequency,document_limit,batch_size",
+    [
+        # Minimal valid input with company_universe
+        (
+            "Supply Chain Reshaping",
+            ["4A6F00", "D8442A"],
+            None,
+            "2025-06-01",
+            "2025-08-01",
+            "openai::gpt-4o-mini",
+            None,
+            DocumentTypeEnum.NEWS,
+            None,
+            FrequencyEnum.monthly,
+            100,
+            10,
+        ),
+        # Minimal valid input with watchlist_id
+        (
+            "US Import Tariffs against China",
+            None,
+            "44118802-9104-4265-b97a-2e6d88d74893",
+            "2025-06-01",
+            "2025-08-01",
+            "openai::gpt-4o-mini",
+            2025,
+            DocumentTypeEnum.FILINGS,
+            0.8,
+            FrequencyEnum.weekly,
+            50,
+            5,
+        ),
+        # Different frequency and document type
+        (
+            "Supply Chain Reshapingn",
+            ["A12345"],
+            None,
+            "2025-01-01",
+            "2025-12-31",
+            "openai::gpt-4o-mini",
+            2025,
+            DocumentTypeEnum.TRANSCRIPTS,
+            None,
+            FrequencyEnum.yearly,
+            200,
+            20,
+        ),
+        # Control entities with multiple places
+        (
+            "Supply Chain Reshaping",
+            ["B67890"],
+            None,
+            "2025-07-01",
+            "2025-08-01",
+            "openai::gpt-4o-mini",
+            None,
+            DocumentTypeEnum.ALL,
+            None,
+            FrequencyEnum.daily,
+            10,
+            1,
+        ),
+    ],
+)
+def test_thematic_screen_request_model(
+    theme,
+    company_universe,
+    watchlist_id,
+    start_date,
+    end_date,
+    llm_model,
+    fiscal_year,
+    document_type,
+    rerank_threshold,
+    frequency,
+    document_limit,
+    batch_size,
+):
+    req = ThematicScreenRequest(
+        theme=theme,
+        company_universe=company_universe,
+        watchlist_id=watchlist_id,
+        start_date=start_date,
+        end_date=end_date,
+        llm_model=llm_model,
+        fiscal_year=fiscal_year,
+        document_type=document_type,
+        rerank_threshold=rerank_threshold,
+        frequency=frequency,
+        document_limit=document_limit,
+        batch_size=batch_size,
+    )
+    assert req.theme == theme
+    assert req.start_date == start_date
+    assert req.end_date == end_date
+    assert req.llm_model == llm_model
+    assert req.document_type == document_type
+    assert req.frequency == frequency
+    assert req.document_limit == document_limit
+    assert req.batch_size == batch_size
+    if company_universe:
+        assert req.company_universe == company_universe
+    if watchlist_id:
+        assert req.watchlist_id == watchlist_id
+    if rerank_threshold is not None:
+        assert req.rerank_threshold == rerank_threshold
