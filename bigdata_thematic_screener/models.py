@@ -35,6 +35,7 @@ class ThemeScore(RootModel):
 class CompanyScoring(BaseModel):
     ticker: str | None
     industry: str
+    motivation: str | None
     composite_score: int
     themes: ThemeScore
 

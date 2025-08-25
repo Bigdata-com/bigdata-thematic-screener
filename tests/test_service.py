@@ -36,6 +36,22 @@ def df_company():
 
 
 @pytest.fixture
+def df_motivation():
+    return pd.DataFrame(
+        [
+            {
+                "Company": "A",
+                "Motivation": "Growth",
+            },
+            {
+                "Company": "B",
+                "Motivation": "Decline",
+            },
+        ]
+    )
+
+
+@pytest.fixture
 def df_labeled():
     return pd.DataFrame(
         [
@@ -86,8 +102,8 @@ def theme_tree():
     )
 
 
-def test_build_response(df_company, df_labeled, theme_tree):
-    response = build_response(df_company, df_labeled, theme_tree)
+def test_build_response(df_company, df_labeled, df_motivation, theme_tree):
+    response = build_response(df_company, df_motivation, df_labeled, theme_tree)
     assert isinstance(response, ThematicScreenerResponse)
     assert isinstance(response.theme_taxonomy, ThemeTaxonomy)
     assert isinstance(response.theme_scoring, ThemeScoring)

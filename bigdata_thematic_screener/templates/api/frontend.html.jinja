@@ -176,13 +176,14 @@
         html += '<h3>Theme Scoring</h3>';
         html += '<table border="1" cellpadding="6" cellspacing="0" class="table-main">';
         html += '<tr>';
-        html += '<th>Ticker</th><th>Industry</th><th>Composite Score</th><th>Themes</th>';
+        html += '<th>Ticker</th><th>Industry</th><th>Composite Score</th><th>Motivation</th><th>Themes</th>';
         html += '</tr>';
         for (const [ticker, scoring] of Object.entries(data.theme_scoring)) {
           html += '<tr>';
           html += `<td>${escapeHtml(scoring.ticker)}</td>`;
           html += `<td>${escapeHtml(scoring.industry)}</td>`;
           html += `<td>${escapeHtml(scoring.composite_score)}</td>`;
+          html += `<td>${escapeHtml(scoring.motivation)}</td>`;
           // Themes (dict)
           if (scoring.themes) {
             let themesStr = Object.entries(scoring.themes).map(([theme, val]) => `${escapeHtml(theme)}: ${escapeHtml(val)}`).join('<br>');

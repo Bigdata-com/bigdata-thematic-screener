@@ -55,6 +55,7 @@ def prepare_companies(
 
 def build_response(
     df_company: pd.DataFrame,
+    df_motivation: pd.DataFrame,
     df_labeled: pd.DataFrame,
     theme_tree: ThemeTree,
 ) -> ThematicScreenerResponse:
@@ -66,10 +67,14 @@ def build_response(
         company = record.pop("Company")
         ticker = record.pop("Ticker")
         industry = record.pop("Industry")
+        motivation = df_motivation.loc[df_motivation["Company"] == company][
+            "Motivation"
+        ].values[0]
         composite_score = record.pop("Composite Score")
         theme_scoring[company] = CompanyScoring(
             ticker=ticker,
             industry=industry,
+            motivation=motivation,
             composite_score=composite_score,
             themes=ThemeScore(
                 root={
@@ -146,6 +151,7 @@ def process_request(
         )
         df_labeled = results["df_labeled"]
         df_company = results["df_company"]
+        df_motivation = results["df_motivation"]
         theme_tree = results["theme_tree"]
 
         workflow_execution_end = datetime.now()
@@ -166,6 +172,7 @@ def process_request(
 
         return build_response(
             df_company=df_company,
+            df_motivation=df_motivation,
             df_labeled=df_labeled,
             theme_tree=theme_tree,
         )
