@@ -8,7 +8,6 @@ from bigdata_client.models.entities import Company
 from bigdata_client.models.search import DocumentType
 from bigdata_research_tools.themes import ThemeTree
 from bigdata_research_tools.workflows.thematic_screener import ThematicScreener
-from fastapi import HTTPException
 
 from bigdata_thematic_screener.models import (
     CompanyScoring,
@@ -128,54 +127,49 @@ def process_request(
 ):
     if not bigdata:
         raise ValueError("Bigdata client is not initialized.")
-    try:
-        workflow_execution_start = datetime.now()
 
-        companies = prepare_companies(company_universe, watchlist_id, bigdata)
+    workflow_execution_start = datetime.now()
 
-        thematic_screener = ThematicScreener(
-            llm_model=llm_model,
-            main_theme=theme,
-            companies=companies,
-            start_date=start_date,
-            end_date=end_date,
-            document_type=document_type,
-            fiscal_year=fiscal_year,
-            rerank_threshold=rerank_threshold,
-        )
+    companies = prepare_companies(company_universe, watchlist_id, bigdata)
 
-        results = thematic_screener.screen_companies(
-            document_limit=document_limit,
-            batch_size=batch_size,
-            frequency=frequency,
-        )
-        df_labeled = results["df_labeled"]
-        df_company = results["df_company"]
-        df_motivation = results["df_motivation"]
-        theme_tree = results["theme_tree"]
+    thematic_screener = ThematicScreener(
+        llm_model=llm_model,
+        main_theme=theme,
+        companies=companies,
+        start_date=start_date,
+        end_date=end_date,
+        document_type=document_type,
+        fiscal_year=fiscal_year,
+        rerank_threshold=rerank_threshold,
+    )
 
-        workflow_execution_end = datetime.now()
+    results = thematic_screener.screen_companies(
+        document_limit=document_limit,
+        batch_size=batch_size,
+        frequency=frequency,
+    )
+    df_labeled = results["df_labeled"]
+    df_company = results["df_company"]
+    df_motivation = results["df_motivation"]
+    theme_tree = results["theme_tree"]
 
-        # Send log
-        send_trace(
-            bigdata,
-            event_name=TraceEventName.THEMATIC_SCREENER_REPORT_GENERATED,
-            trace={
-                "bigdataClientVersion": version("bigdata-client"),
-                "workflowStartDate": workflow_execution_start.isoformat(
-                    timespec="seconds"
-                ),
-                "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
-                "watchlistLength": len(companies),
-            },
-        )
+    workflow_execution_end = datetime.now()
 
-        return build_response(
-            df_company=df_company,
-            df_motivation=df_motivation,
-            df_labeled=df_labeled,
-            theme_tree=theme_tree,
-        )
+    # Send log
+    send_trace(
+        bigdata,
+        event_name=TraceEventName.THEMATIC_SCREENER_REPORT_GENERATED,
+        trace={
+            "bigdataClientVersion": version("bigdata-client"),
+            "workflowStartDate": workflow_execution_start.isoformat(timespec="seconds"),
+            "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
+            "watchlistLength": len(companies),
+        },
+    )
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return build_response(
+        df_company=df_company,
+        df_motivation=df_motivation,
+        df_labeled=df_labeled,
+        theme_tree=theme_tree,
+    )

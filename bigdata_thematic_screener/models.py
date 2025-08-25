@@ -16,7 +16,7 @@ class LabeledChunk(BaseModel):
     sector: str
     industry: str
     country: str
-    ticker: str
+    ticker: str | None
     document_id: str
     headline: str
     quote: str

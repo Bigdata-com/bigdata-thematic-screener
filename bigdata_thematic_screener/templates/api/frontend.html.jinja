@@ -176,7 +176,18 @@
         html += '<h3>Theme Scoring</h3>';
         html += '<table border="1" cellpadding="6" cellspacing="0" class="table-main">';
         html += '<tr>';
-        html += '<th>Ticker</th><th>Industry</th><th>Composite Score</th><th>Motivation</th><th>Themes</th>';
+        // Dynamically create theme columns
+        let allThemes = new Set();
+        for (const scoring of Object.values(data.theme_scoring)) {
+          if (scoring.themes) {
+            Object.keys(scoring.themes).forEach(theme => allThemes.add(theme));
+          }
+        }
+        const themeList = Array.from(allThemes);
+        html += '<th>Ticker</th><th>Industry</th><th>Composite Score</th><th>Motivation</th>';
+        themeList.forEach(theme => {
+          html += `<th>${escapeHtml(theme)}</th>`;
+        });
         html += '</tr>';
         for (const [ticker, scoring] of Object.entries(data.theme_scoring)) {
           html += '<tr>';
@@ -184,13 +195,14 @@
           html += `<td>${escapeHtml(scoring.industry)}</td>`;
           html += `<td>${escapeHtml(scoring.composite_score)}</td>`;
           html += `<td>${escapeHtml(scoring.motivation)}</td>`;
-          // Themes (dict)
-          if (scoring.themes) {
-            let themesStr = Object.entries(scoring.themes).map(([theme, val]) => `${escapeHtml(theme)}: ${escapeHtml(val)}`).join('<br>');
-            html += `<td>${themesStr}</td>`;
-          } else {
-            html += '<td></td>';
-          }
+          // Explode themes into columns
+          themeList.forEach(theme => {
+            if (scoring.themes && theme in scoring.themes) {
+              html += `<td>${escapeHtml(scoring.themes[theme])}</td>`;
+            } else {
+              html += '<td></td>';
+            }
+          });
           html += '</tr>';
         }
         html += '</table>';
