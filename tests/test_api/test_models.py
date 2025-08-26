@@ -8,18 +8,17 @@ from bigdata_thematic_screener.api.models import (
 
 
 @pytest.mark.parametrize(
-    "theme,company_universe,watchlist_id,start_date,end_date,llm_model,fiscal_year,document_type,rerank_threshold,frequency,document_limit,batch_size",
+    "theme,companies,start_date,end_date,llm_model,fiscal_year,document_type,rerank_threshold,frequency,document_limit,batch_size",
     [
         # Minimal valid input with company_universe
         (
             "Supply Chain Reshaping",
             ["4A6F00", "D8442A"],
-            None,
             "2025-06-01",
             "2025-08-01",
             "openai::gpt-4o-mini",
-            None,
-            DocumentTypeEnum.NEWS,
+            2025,
+            DocumentTypeEnum.TRANSCRIPTS,
             None,
             FrequencyEnum.monthly,
             100,
@@ -28,13 +27,12 @@ from bigdata_thematic_screener.api.models import (
         # Minimal valid input with watchlist_id
         (
             "US Import Tariffs against China",
-            None,
             "44118802-9104-4265-b97a-2e6d88d74893",
             "2025-06-01",
             "2025-08-01",
             "openai::gpt-4o-mini",
             2025,
-            DocumentTypeEnum.FILINGS,
+            DocumentTypeEnum.TRANSCRIPTS,
             0.8,
             FrequencyEnum.weekly,
             50,
@@ -44,7 +42,6 @@ from bigdata_thematic_screener.api.models import (
         (
             "Supply Chain Reshapingn",
             ["A12345"],
-            None,
             "2025-01-01",
             "2025-12-31",
             "openai::gpt-4o-mini",
@@ -59,12 +56,11 @@ from bigdata_thematic_screener.api.models import (
         (
             "Supply Chain Reshaping",
             ["B67890"],
-            None,
             "2025-07-01",
             "2025-08-01",
             "openai::gpt-4o-mini",
-            None,
-            DocumentTypeEnum.ALL,
+            2025,
+            DocumentTypeEnum.TRANSCRIPTS,
             None,
             FrequencyEnum.daily,
             10,
@@ -74,8 +70,7 @@ from bigdata_thematic_screener.api.models import (
 )
 def test_thematic_screen_request_model(
     theme,
-    company_universe,
-    watchlist_id,
+    companies,
     start_date,
     end_date,
     llm_model,
@@ -88,8 +83,7 @@ def test_thematic_screen_request_model(
 ):
     req = ThematicScreenRequest(
         theme=theme,
-        company_universe=company_universe,
-        watchlist_id=watchlist_id,
+        companies=companies,
         start_date=start_date,
         end_date=end_date,
         llm_model=llm_model,
@@ -108,9 +102,7 @@ def test_thematic_screen_request_model(
     assert req.frequency == frequency
     assert req.document_limit == document_limit
     assert req.batch_size == batch_size
-    if company_universe:
-        assert req.company_universe == company_universe
-    if watchlist_id:
-        assert req.watchlist_id == watchlist_id
+    if companies:
+        assert req.companies == companies
     if rerank_threshold is not None:
         assert req.rerank_threshold == rerank_threshold

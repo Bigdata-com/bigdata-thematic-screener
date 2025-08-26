@@ -58,14 +58,18 @@ async def sample_frontend():
 
 @app.post("/thematic-screener", response_model=ThematicScreenerResponse)
 def screen_companies(request: Annotated[ThematicScreenRequest, Body()]):
+    # While we improve the UX of working with several document types with different sets of parameters
+    # we will limit the document type to transcripts
+    DOCUMENT_TYPE = DocumentType.TRANSCRIPTS
+
     return process_request(
-        company_universe=request.company_universe,
-        watchlist_id=request.watchlist_id,
+        companies=request.companies,
         llm_model=request.llm_model,
         theme=request.theme,
+        focus=request.focus,
         start_date=request.start_date,
         end_date=request.end_date,
-        document_type=DocumentType[request.document_type],
+        document_type=DOCUMENT_TYPE,
         fiscal_year=request.fiscal_year,
         rerank_threshold=request.rerank_threshold,
         frequency=request.frequency,

@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 from enum import StrEnum
-from typing import List, Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -35,14 +35,14 @@ class ThematicScreenRequest(BaseModel):
         example="Supply Chain Reshaping",
         description="The central concept to explore.",
     )
-    company_universe: Optional[List[str]] = Field(
+    focus: str | None = Field(
         default=None,
-        description="List of RavenPack entity IDs representing the companies to screen. Required if 'watchlist_id' is not provided.",
-        example=["4A6F00", "D8442A"],
+        description="Specific focus area within the theme.",
+        example="Logistics",
     )
-    watchlist_id: Optional[str] = Field(
-        default=None,
-        description="ID of a watchlist containing companies to analyze. Required if 'company_universe' is not provided.",
+    companies: list[str] | str = Field(
+        ...,
+        description="List of RavenPack entity IDs  or a watchlist ID representing the companies to screen.",
         example="44118802-9104-4265-b97a-2e6d88d74893",
     )
     start_date: str = Field(
@@ -63,9 +63,9 @@ class ThematicScreenRequest(BaseModel):
         example=2024,
     )
 
-    document_type: DocumentTypeEnum = Field(
+    document_type: Literal[DocumentTypeEnum.TRANSCRIPTS] = Field(
         default=DocumentTypeEnum.TRANSCRIPTS,
-        description="Type of documents to analyze (e.g., NEWS, TRANSCRIPT, FILING).",
+        description="Type of documents to analyze (only transcript supported for now).",
     )
     rerank_threshold: Optional[float] = Field(
         default=None,
@@ -83,14 +83,6 @@ class ThematicScreenRequest(BaseModel):
         default=10,
         description="Number of entities to include in each batch for parallel querying.",
     )
-
-    @model_validator(mode="before")
-    def check_company_source(cls, values):
-        if not values.get("company_universe") and not values.get("watchlist_id"):
-            raise ValueError(
-                "You must provide either 'company_universe' or 'watchlist_id'"
-            )
-        return values
 
     @model_validator(mode="before")
     def check_date_range(cls, values):

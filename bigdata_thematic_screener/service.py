@@ -22,20 +22,21 @@ from bigdata_thematic_screener.traces import TraceEventName, send_trace
 
 
 def prepare_companies(
-    company_universe: list[str] | None,
-    watchlist_id: str | None,
+    companies: list[str] | str,
     bigdata: Bigdata,
 ) -> list[Company]:
     """Prepare the list of companies for analysis. Ensure at least one of the forms of providing
     the companies is present and ensures all elements are companies."""
-    if company_universe:
-        entities = bigdata.knowledge_graph.get_entities(company_universe)
-    elif watchlist_id:
+    if isinstance(companies, list):
+        entities = bigdata.knowledge_graph.get_entities(companies)
+    elif isinstance(companies, str):
         entities = bigdata.knowledge_graph.get_entities(
-            bigdata.watchlists.get(watchlist_id).items
+            bigdata.watchlists.get(companies).items
         )
     else:
-        raise ValueError("Either company_universe or watchlist_id must be provided.")
+        raise ValueError(
+            "Companies must be either a list of RP entity IDs or a string representing a watchlist ID."
+        )
 
     # Ensure there is entities, there is no duplicates and all entities are companies
     if len(entities) == 0:
@@ -111,10 +112,10 @@ def build_response(
 
 
 def process_request(
-    company_universe: list[str] | None,
-    watchlist_id: str | None,
+    companies: list[str] | str,
     llm_model: str,
     theme: str,
+    focus: str | None,
     start_date: str,
     end_date: str,
     document_type: DocumentType,
@@ -128,14 +129,19 @@ def process_request(
     if not bigdata:
         raise ValueError("Bigdata client is not initialized.")
 
+    # Research tools marks it as optional, but expects an empty screen if not available
+    if focus is None:
+        focus = ""
+
     workflow_execution_start = datetime.now()
 
-    companies = prepare_companies(company_universe, watchlist_id, bigdata)
+    resolved_companies = prepare_companies(companies, bigdata)
 
     thematic_screener = ThematicScreener(
         llm_model=llm_model,
         main_theme=theme,
-        companies=companies,
+        focus=focus,
+        companies=resolved_companies,
         start_date=start_date,
         end_date=end_date,
         document_type=document_type,
@@ -163,7 +169,7 @@ def process_request(
             "bigdataClientVersion": version("bigdata-client"),
             "workflowStartDate": workflow_execution_start.isoformat(timespec="seconds"),
             "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
-            "watchlistLength": len(companies),
+            "watchlistLength": len(resolved_companies),
         },
     )
 

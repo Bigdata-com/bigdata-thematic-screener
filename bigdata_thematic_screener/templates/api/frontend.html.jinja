@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Thematic Screener</title>
+  <link rel="icon" href="https://app.bigdata.com/favicon.ico"/>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -93,11 +94,11 @@
     <label for="theme">Theme:</label>
     <input type="text" id="theme" class="input-field" placeholder="{{ theme }}" required value="{{ theme }}" />
 
-    <label for="company_universe">Company Universe (comma separated RavenPack IDs):</label>
-    <input type="text" id="company_universe" class="input-field" placeholder="{{ company_universe|join(',') if company_universe is defined and company_universe else '' }}" value="{{ company_universe|join(',') if company_universe is defined and company_universe else '' }}" />
+    <label for="focus">Focus:</label>
+    <input type="text" id="focus" class="input-field" placeholder="{{ focus }}" value="{{ focus }}" />
 
-    <label for="watchlist_id">Watchlist ID:</label>
-    <input type="text" id="watchlist_id" class="input-field" placeholder="{{ watchlist_id }}" value="{{ watchlist_id }}" />
+    <label for="companies">Company Universe (either a comma separated RavenPack IDs or a watchlist ID):</label>
+    <input type="text" id="companies" class="input-field" placeholder="{{ companies }}" value="{{ companies }}" />
 
     <label for="start_date">Start Date:</label>
     <input type="date" id="start_date" class="input-field" placeholder="{{ start_date }}" value="{{ start_date }}" />
@@ -105,6 +106,14 @@
     <label for="end_date">End Date:</label>
     <input type="date" id="end_date" class="input-field" placeholder="{{ end_date }}" value="{{ end_date }}" />
 
+    <label for="frequency">Frequency:</label>
+    <select id="frequency" class="input-field">
+      <option value="D" {% if frequency == 'D' %}selected{% endif %}>Daily</option>
+      <option value="W" {% if frequency == 'W' %}selected{% endif %}>Weekly</option>
+      <option value="M" {% if frequency == 'M' %}selected{% endif %}>Monthly</option>
+      <option value="3M" {% if frequency == '3M' %}selected{% endif %}>Quarterly</option>
+      <option value="Y" {% if frequency == 'Y' %}selected{% endif %}>Yearly</option>
+    </select>
 
     <label for="fiscal_year">Fiscal Year:</label>
     <input type="text" id="fiscal_year" class="input-field" placeholder="e.g. 2025" value="{{ fiscal_year if fiscal_year else "" }}" />
@@ -112,8 +121,9 @@
     <label for="llm_model">LLM Model:</label>
     <input type="text" id="llm_model" class="input-field" placeholder="{{ llm_model }}" value="{{ llm_model }}" />
 
-    <label for="document_type">Document Type:</label>
-    <select id="document_type" class="input-field">
+    <!-- Document Type hidden for now until we improve the UX -->
+    <label for="document_type" style="display:none;">Document Type:</label>
+    <select id="document_type" class="input-field" style="display:none;">
       <option value="ALL" {% if document_type == 'ALL' %}selected{% endif %}>ALL</option>
       <option value="FILINGS" {% if document_type == 'FILINGS' %}selected{% endif %}>FILINGS</option>
       <option value="TRANSCRIPTS" {% if document_type == 'TRANSCRIPTS' %}selected{% endif %}>TRANSCRIPTS</option>
@@ -124,14 +134,6 @@
     <label for="rerank_threshold">Rerank Threshold (0-1):</label>
     <input type="number" id="rerank_threshold" class="input-field" min="0" max="1" step="0.01" placeholder="{{ rerank_threshold if rerank_threshold is defined and rerank_threshold is not none else '' }}" value="{{ rerank_threshold if rerank_threshold is defined and rerank_threshold is not none else '' }}" />
 
-    <label for="frequency">Frequency:</label>
-    <select id="frequency" class="input-field">
-      <option value="D" {% if frequency == 'D' %}selected{% endif %}>Daily</option>
-      <option value="W" {% if frequency == 'W' %}selected{% endif %}>Weekly</option>
-      <option value="M" {% if frequency == 'M' %}selected{% endif %}>Monthly</option>
-      <option value="3M" {% if frequency == '3M' %}selected{% endif %}>Quarterly</option>
-      <option value="Y" {% if frequency == 'Y' %}selected{% endif %}>Yearly</option>
-    </select>
 
     <label for="document_limit">Document Limit:</label>
     <input type="number" id="document_limit" class="input-field" placeholder="{{ document_limit }}" value="{{ document_limit }}" min="1" />
@@ -268,8 +270,8 @@
 
       // Gather form data
       const theme = document.getElementById('theme').value.trim();
-      const company_universe = document.getElementById('company_universe').value.trim();
-      const watchlist_id = document.getElementById('watchlist_id').value.trim();
+      const focus = document.getElementById('focus').value.trim();
+      const companies = document.getElementById('companies').value.trim();
       const start_date = document.getElementById('start_date').value;
       const end_date = document.getElementById('end_date').value;
       let fiscal_year = document.getElementById('fiscal_year').value.trim();
@@ -287,6 +289,7 @@
       let payload = {
         theme,
         focus,
+        focus,
         fiscal_year,
         llm_model,
         document_type,
@@ -294,11 +297,16 @@
         document_limit: document_limit ? parseInt(document_limit) : undefined,
         batch_size: batch_size ? parseInt(batch_size) : undefined
       };
-      if (company_universe) {
-        payload.company_universe = company_universe.split(',').map(s => s.trim()).filter(Boolean);
-      }
-      if (watchlist_id) {
-        payload.watchlist_id = watchlist_id;
+      
+      // A list of companies
+      if (companies.includes(',')) {
+        payload.companies = companies.split(',').map(s => s.trim()).filter(Boolean);
+      // A single RP Entity ID
+      } else if (companies.length === 6) {
+        payload.companies = [companies];
+      // A watchlist ID
+      } else if (companies.length > 6) {
+        payload.companies = companies;
       }
 
       if (start_date) payload.start_date = start_date;
