@@ -72,12 +72,13 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
     "theme": "Supply Chain Reshaping",
-    "watchlist_id": "44118802-9104-4265-b97a-2e6d88d74893",
-    "start_date": "2024-06-01",
-    "end_date": "2024-08-01",
-    "frequency": "W",
+    "focus": "Logistics",
+    "companies": "44118802-9104-4265-b97a-2e6d88d74893",
+    "start_date": "2024-01-01",
+    "end_date": "2025-08-26",
+    "fiscal_year": 2024,
     "document_type": "TRANSCRIPTS",
-    "fiscal_year": 2024
+    "frequency": "M"
   }'
 ```
 
