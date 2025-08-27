@@ -263,10 +263,15 @@
       const output = document.getElementById('output');
       const spinner = document.getElementById('spinner');
       const showJsonBtn = document.getElementById('showJsonBtn');
+      const submitBtn = document.querySelector('button[type="submit"]');
       output.innerHTML = '';
       output.classList.remove('error');
       showJsonBtn.style.display = 'none';
       lastJson = null;
+
+      // Disable the submit button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Waiting for response...';
 
       // Gather form data
       const theme = document.getElementById('theme').value.trim();
@@ -331,6 +336,8 @@
         output.innerHTML = `<span class="error">❌ Error: ${err.message}</span>`;
         output.classList.add('error');
       } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Run Screener';
         spinner.style.display = 'none';
       }
     };
