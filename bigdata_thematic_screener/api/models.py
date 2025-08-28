@@ -38,7 +38,7 @@ class ThematicScreenRequest(BaseModel):
     focus: str | None = Field(
         default=None,
         description="Specific focus area within the theme.",
-        example="Logistics",
+        example="Logistics automation, nearshoring strategies, and supply chain digitalization",
     )
     companies: list[str] | str = Field(
         ...,

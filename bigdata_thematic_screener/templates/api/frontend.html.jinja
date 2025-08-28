@@ -85,28 +85,52 @@
       padding: 4px 10px;
       cursor: pointer;
     }
+    .info-btn {
+      background: #f5f5f5;
+      color: #000;
+      border: none;
+      border-radius: 50%;
+      width: 1.1em;
+      height: 1.1em;
+      font-size: 0.9em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
   </style>
 </head>
 <body>
+  <!-- Individual Info Buttons and Modals for Each Label -->
+  <div id="infoModalsContainer"></div>
   <h1>Thematic Screener Request</h1>
   <form id="screenerForm" autocomplete="off">
 
-    <label for="theme">Theme:</label>
+    <label for="theme">
+      Theme: <button type="button" class="info-btn" onclick="showInfoModal('theme')" title="Info about Theme">i</button>
+    </label>
     <input type="text" id="theme" class="input-field" placeholder="{{ theme }}" required value="{{ theme }}" />
 
-    <label for="focus">Focus:</label>
+    <label for="focus">
+      Focus: <button type="button" class="info-btn" onclick="showInfoModal('focus')" title="Info about Focus">i</button>
+    </label>
     <input type="text" id="focus" class="input-field" placeholder="{{ focus }}" value="{{ focus }}" />
 
-    <label for="companies">Company Universe (either a comma separated RavenPack IDs or a watchlist ID):</label>
+    <label for="companies">
+      Company Universe (either a comma separated RavenPack IDs or a watchlist ID): <button type="button" class="info-btn" onclick="showInfoModal('companies')" title="Info about Companies">i</button>
+    </label>
     <input type="text" id="companies" class="input-field" placeholder="{{ companies }}" value="{{ companies }}" />
 
-    <label for="start_date">Start Date:</label>
+    <label for="start_date">
+      Start Date: <button type="button" class="info-btn" onclick="showInfoModal('start_date')" title="Info about Start Date">i</button>
+    </label>
     <input type="date" id="start_date" class="input-field" placeholder="{{ start_date }}" value="{{ start_date }}" />
 
-    <label for="end_date">End Date:</label>
+    <label for="end_date">
+      End Date: <button type="button" class="info-btn" onclick="showInfoModal('start_date')" title="Info about End Date">i</button>
+    </label>
     <input type="date" id="end_date" class="input-field" placeholder="{{ end_date }}" value="{{ end_date }}" />
 
-    <label for="frequency">Frequency:</label>
+    <label for="frequency">
+      Frequency: <button type="button" class="info-btn" onclick="showInfoModal('frequency')" title="Info about Frequency">i</button>
+    </label>
     <select id="frequency" class="input-field">
       <option value="D" {% if frequency == 'D' %}selected{% endif %}>Daily</option>
       <option value="W" {% if frequency == 'W' %}selected{% endif %}>Weekly</option>
@@ -115,14 +139,20 @@
       <option value="Y" {% if frequency == 'Y' %}selected{% endif %}>Yearly</option>
     </select>
 
-    <label for="fiscal_year">Fiscal Year:</label>
+    <label for="fiscal_year">
+      Fiscal Year: <button type="button" class="info-btn" onclick="showInfoModal('fiscal_year')" title="Info about Fiscal Year">i</button>
+    </label>
     <input type="text" id="fiscal_year" class="input-field" placeholder="e.g. 2025" value="{{ fiscal_year if fiscal_year else "" }}" />
 
-    <label for="llm_model">LLM Model:</label>
+    <label for="llm_model">
+      LLM Model: <button type="button" class="info-btn" onclick="showInfoModal('llm_model')" title="Info about LLM Model">i</button>
+    </label>
     <input type="text" id="llm_model" class="input-field" placeholder="{{ llm_model }}" value="{{ llm_model }}" />
 
     <!-- Document Type hidden for now until we improve the UX -->
-    <label for="document_type" style="display:none;">Document Type:</label>
+    <label for="document_type" style="display:none;">
+      Document Type: <button type="button" class="info-btn" onclick="showInfoModal('document_type')" title="Info about Document Type">i</button>
+    </label>
     <select id="document_type" class="input-field" style="display:none;">
       <option value="ALL" {% if document_type == 'ALL' %}selected{% endif %}>ALL</option>
       <option value="FILINGS" {% if document_type == 'FILINGS' %}selected{% endif %}>FILINGS</option>
@@ -131,17 +161,50 @@
       <option value="FILES" {% if document_type == 'FILES' %}selected{% endif %}>FILES</option>
     </select>
 
-    <label for="rerank_threshold">Rerank Threshold (0-1):</label>
+    <label for="rerank_threshold">
+      Rerank Threshold (0-1): <button type="button" class="info-btn" onclick="showInfoModal('rerank_threshold')" title="Info about Rerank Threshold">i</button>
+    </label>
     <input type="number" id="rerank_threshold" class="input-field" min="0" max="1" step="0.01" placeholder="{{ rerank_threshold if rerank_threshold is defined and rerank_threshold is not none else '' }}" value="{{ rerank_threshold if rerank_threshold is defined and rerank_threshold is not none else '' }}" />
 
 
-    <label for="document_limit">Document Limit:</label>
+    <label for="document_limit">
+      Document Limit: <button type="button" class="info-btn" onclick="showInfoModal('document_limit')" title="Info about Document Limit">i</button>
+    </label>
     <input type="number" id="document_limit" class="input-field" placeholder="{{ document_limit }}" value="{{ document_limit }}" min="1" />
 
-    <label for="batch_size">Batch Size:</label>
+    <label for="batch_size">
+      Batch Size: <button type="button" class="info-btn" onclick="showInfoModal('batch_size')" title="Info about Batch Size">i</button>
+    </label>
     <input type="number" id="batch_size" class="input-field" placeholder="{{ batch_size }}" value="{{ batch_size }}" min="1" />
 
     <button type="submit" class="btn mb-20">Run Screener</button>
+    <script>
+      // Info modal content for each label
+      const infoContents = {
+        theme: `<b>Theme</b>:<br>The main theme, topic, or trend you want to screen for exposure. It can be specified as a single word or as a short sentence. The Screener will generate a list of sub-themes representing individual, self contained components of the main theme. The theme can contain multiple core concepts, but we would recommend not adding too many core concepts in the same screener run.<br><i>Examples: "Artificial Intelligence", "Supply Chain Reshaping", "Energy Transition"</i>`,
+        focus: `<b>Focus</b>:<br> Use this parameter to pass additional, custom instructions to the llm when breaking down the theme into sub-themes. These parameters allow you to guide the mindmap creation and customize it to your needs, as it allows users to inject their own domain knowledge, your specific point of view, and it will ensure that the mindmap will focus on the core concepts required.`,
+        companies: `<b>Company Universe</b>:<br>The portfolio of companies you want to screen for exposure, either as a list of RavenPack entity IDs (e.g., ["4A6F00", "D8442A"]) or a watchlist ID (e.g., "44118802-9104-4265-b97a-2e6d88d74893"). Watchlists can be created programmatically using the <a href='https://docs.bigdata.com/getting-started/watchlist_management' target='_blank'>Bigdata.com SDK</a> or through the <a href='https://app.bigdata.com/watchlists' target='_blank'>Bigdata app</a>.`,
+        start_date: `<b>Start/End Date</b>:<br>The start and end of the time sample during which you want to screen your portfolio for thematic exposure. Format: <code>YYYY-MM-DD</code>.`,
+        document_type: `<b>Document Type</b>:<br>The type of documents to search over. Use this to analyze text data from news, corporate transcripts, or filings. Currently, only "TRANSCRIPTS" is supported.`,
+        fiscal_year: `<b>Fiscal Year</b>:<br>For Transcripts and Filings, filter documents by their reporting details. <b>fiscal_year</b> represents the annual reporting period and can be combined with <b>start_date</b> and <b>end_date</b> for time-sensitive queries. Not applicable to News.`,
+        rerank_threshold: `<b>Rerank Threshold</b>:<br>Optional, used with sentence search only. Ensures close cosine similarity between sentence embeddings and retrieved chunks. By default, not applied. For most use cases, one-step retrieval is sufficient. <a href='https://docs.bigdata.com/how-to-guides/rerank_search' target='_blank'>Learn more</a>.`,
+        frequency: `<b>Frequency</b>:<br>Break down your sample range into higher frequency intervals (<code>D</code>, <code>Y</code>, <code>M</code>, <code>3M</code>, <code>Y</code>). Useful for large samples to control document retrieval over time.`,
+        llm_model: `<b>LLM Model</b>:<br>The LLM model to be used for mindmap generation and text analysis. It has to be specified as a string containing both provider name and model name separated by two colons: <provider::model>.`,
+        document_limit: `<b>Document Limit</b>:<br>The maximum number of documents to be retrieved by each query. This is a single value that applies to any combination of query statement & date range.`,
+        batch_size: `<b>Batch Size</b>:<br>Set this parameter when screening a large portfolio of companies (i.e. 50 or more). It allows to break down the portfolio into smaller batches of fixed size, and instructs the search service to run parallel queries for each and every batch. This allows for improving the sampling across your portfolio, given the document limit constraint that has to be applied per query.`
+      };
+
+      function showInfoModal(label) {
+        let container = document.getElementById('infoModalsContainer');
+        container.innerHTML = `<div class='modal-bg' style='display:block;' onclick='if(event.target==this)this.style.display="none";'>
+          <div class='modal-content'>
+            <button class='modal-close' onclick='this.closest(".modal-bg").style.display="none"'>&times;</button>
+            <div style='font-size:1.1em;'>${infoContents[label] || 'No info available.'}</div>
+            <div style='margin-top:18px;font-size:0.95em;'>For a complete list of parameters and their descriptions, refer to the <a href='http://localhost:8000/docs' target='_blank'>API documentation</a>.</div>
+          </div>
+        </div>`;
+      }
+    </script>
   </form>
   <div id="spinner" style="display:none;">⏳ Loading...</div>
   <button id="showJsonBtn" class="btn mb-20" style="display:none;">Show raw JSON</button>
