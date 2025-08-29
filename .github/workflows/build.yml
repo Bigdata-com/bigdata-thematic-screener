@@ -36,7 +36,7 @@ jobs:
         push: false
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        tags: ghcr.io/bigdata-com/bigdata-thematic-screener:latest #, ghcr.io/bigdata-com/bigdata-thematic-screener:${{ github.event.release.tag_name }}
+        tags: ghcr.io/bigdata-com/bigdata-thematic-screener:latest, ghcr.io/bigdata-com/bigdata-thematic-screener:${{ github.event.release.tag_name }}
     - name: Run security scan
       uses: Bigdata-com/security-scan-containers@master
       with:
@@ -45,11 +45,10 @@ jobs:
         falcon_client_secret: ${{ secrets.FALCON_CLIENT_SECRET }}
         falcon_region: ${{ secrets.FALCON_REGION }}
         fcs_version: "2.0.2"
-        # Disable while testing the image on PR
-#    - name: Push Docker image
-#      uses: docker/build-push-action@v6
-#      with:
-#        context: .
-#        file: ./Dockerfile
-#        push: true
-#        tags: ghcr.io/bigdata-com/bigdata-thematic-screener:latest,ghcr.io/bigdata-com/bigdata-thematic-screener:${{ github.event.release.tag_name }}
+    - name: Push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ghcr.io/bigdata-com/bigdata-thematic-screener:latest,ghcr.io/bigdata-com/bigdata-thematic-screener:${{ github.event.release.tag_name }}
