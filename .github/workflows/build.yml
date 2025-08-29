@@ -35,7 +35,7 @@ jobs:
         push: false
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        tags: ghcr.io/bigdata-com/bigdata-thematic-screener:latest,ghcr.io/bigdata-com/bigdata-thematic-screener:${{ github.event.release.tag_name }}
+        tags: ghcr.io/bigdata-com/bigdata-thematic-screener:latest #, ghcr.io/bigdata-com/bigdata-thematic-screener:${{ github.event.release.tag_name }}
     - name: Run security scan
       uses: Bigdata-com/security-scan-containers@master
       with:
