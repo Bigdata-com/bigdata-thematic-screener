@@ -1,11 +1,12 @@
 from typing import Annotated
 
 from bigdata_client import Bigdata
-from fastapi import Body, FastAPI
+from fastapi import Body, FastAPI, Security
 from fastapi.responses import HTMLResponse
 
 from bigdata_thematic_screener import __version__, logger
 from bigdata_thematic_screener.api.models import ThematicScreenRequest
+from bigdata_thematic_screener.api.secure import query_scheme
 from bigdata_thematic_screener.api.utils import get_example_values_from_schema
 from bigdata_thematic_screener.models import ThematicScreenerResponse
 from bigdata_thematic_screener.service import DocumentType, process_request
@@ -47,7 +48,7 @@ def health_check():
 
 
 @app.get("/")
-async def sample_frontend():
+async def sample_frontend(_: str = Security(query_scheme)):
     # Get example values from the schema for all fields
     example_values = get_example_values_from_schema(ThematicScreenRequest)
 
@@ -57,7 +58,9 @@ async def sample_frontend():
 
 
 @app.post("/thematic-screener", response_model=ThematicScreenerResponse)
-def screen_companies(request: Annotated[ThematicScreenRequest, Body()]):
+def screen_companies(
+    request: Annotated[ThematicScreenRequest, Body()], _: str = Security(query_scheme)
+):
     # While we improve the UX of working with several document types with different sets of parameters
     # we will limit the document type to transcripts
     DOCUMENT_TYPE = DocumentType.TRANSCRIPTS

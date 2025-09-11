@@ -54,7 +54,6 @@ For a custom enterprise-ready solution, please contact us at [support@bigdata.co
 We perform a pre-release security scan on our container images to detect vulnerabilities in all components.
 
 
-
 ## How to screen a set of companies?
 
 A thematic screener report provides an executive summary of financially relevant information about a set of companies that form your watchlist. You can generate a report either using the UI or programmatically, allowing you to build custom workflows on top of this service.
@@ -83,6 +82,38 @@ curl -X 'POST' \
 ```
 
 For more details on the parameters, refer to the API documentation @ `http://localhost:8000/docs`.
+
+## Enable access token protection
+You can optionally protect the API endpoints using an access token. To enable this feature, set the `ACCESS_TOKEN` environment variable when running the Docker container. For example:
+
+```bash
+docker run -d \
+  --name bigdata_thematic_screener \
+  -p 8000:8000 \
+  -e BIGDATA_API_KEY=<bigdata-api-key-here> \
+  -e OPENAI_API_KEY=<openai-apikey-here> \
+  -e ACCESS_TOKEN=<access-token-here> \
+  ghcr.io/bigdata-com/bigdata_thematic_screener:latest
+```
+
+Then all API requests must include a `token` query parameter with the correct value to be authorized. For example:
+
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/thematic-screener?token=<access-token-here>' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "theme": "Supply Chain Reshaping",
+    "focus": "Logistics",
+    "companies": "44118802-9104-4265-b97a-2e6d88d74893",
+    "start_date": "2024-01-01",
+    "end_date": "2025-08-26",
+    "fiscal_year": 2024,
+    "document_type": "TRANSCRIPTS",
+    "frequency": "M"
+  }'
+```
 
 # Install and for development locally
 ```bash
