@@ -157,7 +157,7 @@ wheels = [
 
 [[package]]
 name = "bigdata-research-tools"
-version = "0.20.0"
+version = "0.20.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bigdata-client" },
@@ -171,9 +171,9 @@ dependencies = [
     { name = "tabulate" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d9/2d/2a1ce275d86dc7049268acbf51becef7bd7da655c8fa3fb0878faffa85c5/bigdata_research_tools-0.20.0.tar.gz", hash = "sha256:fee49889bf2e54b94109a8295969f0066ce5d3520f7285d13ff859fb1f9780a1", size = 125527, upload-time = "2025-09-16T09:22:43.062Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f6/91/e479663e430e04126f1326bc2d352e49d0f7d6b4aeaedf4f3f95c44db776/bigdata_research_tools-0.20.1.tar.gz", hash = "sha256:32aa89045b9e60da218f0785fc00ccf54c32d5b0db71cbfe14c8237ddc1a783a", size = 125531, upload-time = "2025-09-16T10:36:23.818Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/21/a0f1459a65e28d64262881f0f036d3ad36c5361a4788c2e0c1b206e77c97/bigdata_research_tools-0.20.0-py3-none-any.whl", hash = "sha256:71ba8754d2fef9a03e19f664c0232022262400819491877ed9386e681713eab2", size = 125303, upload-time = "2025-09-16T09:22:41.688Z" },
+    { url = "https://files.pythonhosted.org/packages/08/c1/fea75729fccdcacc4590db37d4a572c88c48bfb49106a999174723d023d9/bigdata_research_tools-0.20.1-py3-none-any.whl", hash = "sha256:78b627a5c6fb294976bbad7d4061ccc2cb06851990aaecfabcac8d66a8e791d9", size = 125298, upload-time = "2025-09-16T10:36:22.699Z" },
 ]
 
 [[package]]
@@ -201,7 +201,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "bigdata-client", specifier = "==2.18.2" },
-    { name = "bigdata-research-tools", specifier = "==0.20.0" },
+    { name = "bigdata-research-tools", specifier = "==0.20.1" },
     { name = "fastapi", specifier = ">=0.116.1" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "pydantic", specifier = ">=2.10.6" },
