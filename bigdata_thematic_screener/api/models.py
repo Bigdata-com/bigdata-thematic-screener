@@ -152,6 +152,7 @@ class ThematicScreenRequest(BaseModel):
 
 class ThematicScreenerStatusResponse(BaseModel):
     request_id: str
+    last_updated: datetime
     status: WorkflowStatus
     logs: list[str] = Field(default_factory=list)
     report: ThematicScreenerResponse | None = None

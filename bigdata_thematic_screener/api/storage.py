@@ -115,6 +115,7 @@ class StorageManager:
             if sql_report is None:
                 return ThematicScreenerStatusResponse(
                     request_id=request_id,
+                    last_updated=workflow_status.last_updated,
                     status=workflow_status.status,
                     logs=workflow_status.logs,
                     report=None,
@@ -122,6 +123,7 @@ class StorageManager:
 
             return ThematicScreenerStatusResponse(
                 request_id=request_id,
+                last_updated=workflow_status.last_updated,
                 status=workflow_status.status,
                 logs=workflow_status.logs,
                 report=ThematicScreenerResponse(**sql_report.screener_report),  # ty: ignore[missing-argument]
