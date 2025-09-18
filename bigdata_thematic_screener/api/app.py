@@ -10,6 +10,8 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_thematic_screener import LOG_LEVEL, __version__, logger
 from bigdata_thematic_screener.api.models import (
+    ThematicScreenerAcceptedResponse,
+    ThematicScreenerStatusResponse,
     ThematicScreenRequest,
     WorkflowStatus,
 )
@@ -65,30 +67,46 @@ app = FastAPI(
 )
 
 
-@app.get("/health")
+@app.get(
+    "/health",
+    summary="Health check endpoint",
+)
 def health_check():
     return {"status": "ok", "version": __version__}
 
 
-@app.get("/")
-async def sample_frontend(_: str = Security(query_scheme)):
+@app.get(
+    "/",
+    summary="Example frontend for testing the thematic screener.",
+    response_class=HTMLResponse,
+)
+async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     # Get example values from the schema for all fields
     example_values = get_example_values_from_schema(ThematicScreenRequest)
 
     return HTMLResponse(
-        content=loader.get_template("api/frontend.html.jinja").render(**example_values)
+        content=loader.get_template("api/frontend.html.jinja").render(**example_values),
+        media_type="text/html",
     )
 
 
 @app.post(
     "/thematic-screener",
+    summary="Generate a thematic screener report on your universe",
+    response_model=ThematicScreenerAcceptedResponse,
 )
 def screen_companies(
     request: Annotated[ThematicScreenRequest, Body()],
     background_tasks: BackgroundTasks,
     storage_manager: StorageManager = Depends(get_storage_manager),
     _: str = Security(query_scheme),
-):
+) -> JSONResponse:
+    """This endpoints starts the generation of the thematic screener workflow on the background
+    and will return a request_id that can be used to check the status of the request in the
+    `/status/{request_id}` endpoint.
+
+    Note: for now, it only supports transcripts as document type.
+    """
     # While we improve the UX of working with several document types with different sets of parameters
     # we will limit the document type to transcripts
     DOCUMENT_TYPE = DocumentType.TRANSCRIPTS
@@ -109,16 +127,24 @@ def screen_companies(
 
     return JSONResponse(
         status_code=202,
-        content={"request_id": request_id, "status": WorkflowStatus.QUEUED},
+        content=ThematicScreenerAcceptedResponse(
+            request_id=request_id, status=WorkflowStatus.QUEUED
+        ).model_dump(),
     )
 
 
-@app.get("/status/{request_id}")
+@app.get(
+    "/status/{request_id}",
+    summary="Get the status of a thematic screener report",
+)
 def get_status(
     request_id: str,
     storage_manager: StorageManager = Depends(get_storage_manager),
     _: str = Security(query_scheme),
-):
+) -> ThematicScreenerStatusResponse:
+    """Get the status of a thematic screener report by its request_id. If the report is still running,
+    you will get the current status and logs. If the report is completed, you will also get the
+    complete report"""
     report = storage_manager.get_report(request_id)
     if report is None:
         raise HTTPException(status_code=404, detail="Request ID not found")

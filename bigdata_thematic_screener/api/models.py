@@ -150,6 +150,11 @@ class ThematicScreenRequest(BaseModel):
         return values
 
 
+class ThematicScreenerAcceptedResponse(BaseModel):
+    request_id: str
+    status: WorkflowStatus
+
+
 class ThematicScreenerStatusResponse(BaseModel):
     request_id: str
     last_updated: datetime
