@@ -1,7 +1,7 @@
 import pytest
 
 from bigdata_thematic_screener.api.models import (
-    DocumentTypeEnum,
+    DocumentType,
     FrequencyEnum,
     ThematicScreenRequest,
 )
@@ -18,7 +18,7 @@ from bigdata_thematic_screener.api.models import (
             "2025-08-01",
             "openai::gpt-4o-mini",
             2025,
-            DocumentTypeEnum.TRANSCRIPTS,
+            DocumentType.TRANSCRIPTS,
             None,
             FrequencyEnum.monthly,
             100,
@@ -32,7 +32,7 @@ from bigdata_thematic_screener.api.models import (
             "2025-08-01",
             "openai::gpt-4o-mini",
             2025,
-            DocumentTypeEnum.TRANSCRIPTS,
+            DocumentType.TRANSCRIPTS,
             0.8,
             FrequencyEnum.weekly,
             50,
@@ -46,7 +46,7 @@ from bigdata_thematic_screener.api.models import (
             "2025-12-31",
             "openai::gpt-4o-mini",
             2025,
-            DocumentTypeEnum.TRANSCRIPTS,
+            DocumentType.TRANSCRIPTS,
             None,
             FrequencyEnum.yearly,
             200,
@@ -60,7 +60,7 @@ from bigdata_thematic_screener.api.models import (
             "2025-08-01",
             "openai::gpt-4o-mini",
             2025,
-            DocumentTypeEnum.TRANSCRIPTS,
+            DocumentType.TRANSCRIPTS,
             None,
             FrequencyEnum.daily,
             10,

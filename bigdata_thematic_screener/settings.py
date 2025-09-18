@@ -19,6 +19,9 @@ class Settings(BaseSettings):
         PROJECT_DIRECTORY / "bigdata_thematic_screener" / "templates"
     )
 
+    # Data storage configuration
+    DB_STRING: str = "sqlite:///thematic_screener.db"
+
     @classmethod
     def load_from_env(cls) -> "Settings":
         return cls()
