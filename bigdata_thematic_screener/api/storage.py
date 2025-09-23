@@ -1,6 +1,6 @@
-from uuid import UUID
 from datetime import datetime
 from threading import Lock
+from uuid import UUID
 
 from sqlmodel import Session, select
 
@@ -23,12 +23,12 @@ class StorageManager:
 
     def _get_workflow_status(self, request_id: UUID) -> SQLWorkflowStatus | None:
         return self.db_session.exec(
-            select(SQLWorkflowStatus).where(
-                SQLWorkflowStatus.id == request_id
-            )
+            select(SQLWorkflowStatus).where(SQLWorkflowStatus.id == request_id)
         ).first()
 
-    def _get_workflow_report(self, request_id: UUID) -> SQLThematicScreenerReport | None:
+    def _get_workflow_report(
+        self, request_id: UUID
+    ) -> SQLThematicScreenerReport | None:
         return self.db_session.exec(
             select(SQLThematicScreenerReport).where(
                 SQLThematicScreenerReport.id == request_id
@@ -122,7 +122,7 @@ class StorageManager:
                 )
 
             return ThematicScreenerStatusResponse(
-                request_id=request_id,
+                request_id=str(request_id),
                 last_updated=workflow_status.last_updated,
                 status=workflow_status.status,
                 logs=workflow_status.logs,

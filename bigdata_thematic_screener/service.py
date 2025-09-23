@@ -1,7 +1,7 @@
 import math
-from uuid import UUID
 from datetime import datetime
 from importlib.metadata import version
+from uuid import UUID
 
 import pandas as pd
 from bigdata_client import Bigdata

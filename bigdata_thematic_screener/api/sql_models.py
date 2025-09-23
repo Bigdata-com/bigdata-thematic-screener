@@ -1,5 +1,5 @@
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
 
 from sqlalchemy.ext.mutable import MutableList
 from sqlmodel import JSON, Column, Field, SQLModel

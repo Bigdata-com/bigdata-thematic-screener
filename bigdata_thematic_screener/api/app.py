@@ -1,6 +1,6 @@
 from functools import partial
 from typing import Annotated
-from uuid import uuid4, UUID
+from uuid import UUID, uuid4
 
 from bigdata_client import Bigdata
 from bigdata_client.models.search import DocumentType
