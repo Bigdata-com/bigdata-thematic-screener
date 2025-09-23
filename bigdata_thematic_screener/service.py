@@ -131,65 +131,76 @@ def process_request(
     request_id: str,
     storage_manager: StorageManager,
 ):
-    storage_manager.update_status(request_id, WorkflowStatus.IN_PROGRESS)
-    if not bigdata:
+    try:    
+        storage_manager.update_status(request_id, WorkflowStatus.IN_PROGRESS)
+        if not bigdata:
+            raise ValueError("Bigdata client is not initialized.")
+
+        # Research tools marks it as optional, but expects an empty screen if not available
+        if request.focus is None:
+            request.focus = ""
+
+        workflow_execution_start = datetime.now()
+
+        resolved_companies = prepare_companies(request.companies, bigdata)
+        
+
+        thematic_screener = ThematicScreener(
+            llm_model=request.llm_model,
+            main_theme=request.theme,
+            focus=request.focus,
+            companies=resolved_companies,
+            start_date=request.start_date,
+            end_date=request.end_date,
+            document_type=request.document_type,
+            fiscal_year=request.fiscal_year,
+            rerank_threshold=request.rerank_threshold,
+        )
+
+        thematic_screener.register_observer(
+            WorkflowObserver(request_id=request_id, storage_manager=storage_manager)
+        )
+
+        results = thematic_screener.screen_companies(
+            document_limit=request.document_limit,
+            batch_size=request.batch_size,
+            frequency=request.frequency.value,
+        )
+        df_labeled = results["df_labeled"]
+        df_company = results["df_company"]
+        df_motivation = results["df_motivation"]
+        theme_tree = results["theme_tree"]
+
+        workflow_execution_end = datetime.now()
+
+        # Send log
+        send_trace(
+            bigdata,
+            event_name=TraceEventName.THEMATIC_SCREENER_REPORT_GENERATED,
+            trace={
+                "bigdataClientVersion": version("bigdata-client"),
+                "workflowStartDate": workflow_execution_start.isoformat(timespec="seconds"),
+                "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
+                "watchlistLength": len(resolved_companies),
+            },
+        )
+
+        response = build_response(
+            df_company=df_company,
+            df_motivation=df_motivation,
+            df_labeled=df_labeled,
+            theme_tree=theme_tree,
+        )
+
+        storage_manager.mark_workflow_as_completed(request_id, request, response)
+        
+        return response
+    
+    except Exception as e:
+        storage_manager.log_message(
+            request_id=request_id,
+            message=f"Workflow failed with error: {str(e)}",
+        )
         storage_manager.update_status(request_id, WorkflowStatus.FAILED)
-        raise ValueError("Bigdata client is not initialized.")
-
-    # Research tools marks it as optional, but expects an empty screen if not available
-    if request.focus is None:
-        request.focus = ""
-
-    workflow_execution_start = datetime.now()
-
-    resolved_companies = prepare_companies(request.companies, bigdata)
-
-    thematic_screener = ThematicScreener(
-        llm_model=request.llm_model,
-        main_theme=request.theme,
-        focus=request.focus,
-        companies=resolved_companies,
-        start_date=request.start_date,
-        end_date=request.end_date,
-        document_type=request.document_type,
-        fiscal_year=request.fiscal_year,
-        rerank_threshold=request.rerank_threshold,
-    )
-
-    thematic_screener.register_observer(
-        WorkflowObserver(request_id=request_id, storage_manager=storage_manager)
-    )
-
-    results = thematic_screener.screen_companies(
-        document_limit=request.document_limit,
-        batch_size=request.batch_size,
-        frequency=request.frequency.value,
-    )
-    df_labeled = results["df_labeled"]
-    df_company = results["df_company"]
-    df_motivation = results["df_motivation"]
-    theme_tree = results["theme_tree"]
-
-    workflow_execution_end = datetime.now()
-
-    # Send log
-    send_trace(
-        bigdata,
-        event_name=TraceEventName.THEMATIC_SCREENER_REPORT_GENERATED,
-        trace={
-            "bigdataClientVersion": version("bigdata-client"),
-            "workflowStartDate": workflow_execution_start.isoformat(timespec="seconds"),
-            "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
-            "watchlistLength": len(resolved_companies),
-        },
-    )
-
-    response = build_response(
-        df_company=df_company,
-        df_motivation=df_motivation,
-        df_labeled=df_labeled,
-        theme_tree=theme_tree,
-    )
-
-    storage_manager.mark_workflow_as_completed(request_id, request, response)
-    return response
+        raise e
+    

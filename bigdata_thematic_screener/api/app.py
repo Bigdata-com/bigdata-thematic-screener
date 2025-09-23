@@ -85,7 +85,8 @@ async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     example_values = get_example_values_from_schema(ThematicScreenRequest)
 
     return HTMLResponse(
-        content=loader.get_template("api/frontend.html.jinja").render(**example_values),
+        #content=loader.get_template("api/frontend.html.jinja").render(**example_values),
+        content=loader.get_template("api/main_frontend.html.jinja").render(**example_values),
         media_type="text/html",
     )
 
