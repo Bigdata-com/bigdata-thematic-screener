@@ -1,6 +1,6 @@
 from functools import partial
 from typing import Annotated
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 from bigdata_client import Bigdata
 from bigdata_client.models.search import DocumentType
@@ -111,7 +111,7 @@ def screen_companies(
     # we will limit the document type to transcripts
     DOCUMENT_TYPE = DocumentType.TRANSCRIPTS
     request.document_type = DOCUMENT_TYPE
-    request_id = str(uuid4())
+    request_id = uuid4()
 
     storage_manager.update_status(request_id, WorkflowStatus.QUEUED)
 
@@ -128,7 +128,7 @@ def screen_companies(
     return JSONResponse(
         status_code=202,
         content=ThematicScreenerAcceptedResponse(
-            request_id=request_id, status=WorkflowStatus.QUEUED
+            request_id=str(request_id), status=WorkflowStatus.QUEUED
         ).model_dump(),
     )
 
@@ -138,7 +138,7 @@ def screen_companies(
     summary="Get the status of a thematic screener report",
 )
 def get_status(
-    request_id: str,
+    request_id: UUID,
     storage_manager: StorageManager = Depends(get_storage_manager),
     _: str = Security(query_scheme),
 ) -> ThematicScreenerStatusResponse:

@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 from enum import StrEnum
 from typing import Literal, Optional
+from uuid import UUID
 
 from bigdata_client.models.search import DocumentType
 from pydantic import BaseModel, Field, model_validator
