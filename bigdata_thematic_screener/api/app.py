@@ -6,6 +6,7 @@ from bigdata_client import Bigdata
 from bigdata_client.models.search import DocumentType
 from fastapi import BackgroundTasks, Body, Depends, FastAPI, HTTPException, Security
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_thematic_screener import LOG_LEVEL, __version__, logger
@@ -65,6 +66,8 @@ app = FastAPI(
     version=__version__,
     lifespan=lifespan,
 )
+
+app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name="static")
 
 
 @app.get(

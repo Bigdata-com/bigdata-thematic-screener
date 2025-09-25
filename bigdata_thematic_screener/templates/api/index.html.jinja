@@ -2,63 +2,53 @@
 {% block content %}
 
 <div id="infoModalsContainer"></div>
-<div style="display: flex; flex-direction: row; width: 100%; min-height: 500px;">
+<div class="flex flex-row w-full min-h-[500px]">
   <!-- Left: Form -->
-  <div class="w-1/6 min-w-[250px] pr-6 bg-zinc-800 pl-1">
-    <form id="screenerForm">
+  <div class="w-1/6 min-w-[250px] pr-6 bg-zinc-800 pl-2 rounded-l-lg pt-2 pb-2">
+    <div class="overflow-y-auto">
+    <form id="screenerForm" class="sticky top-0 z-10">
       <div class="mb-5">
         <label for="theme" class="block mb-2 font-bold text-md text-white">
-            <span>Theme:</span>
+          <span>Theme:</span>
           <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('theme')"
             title="Info about Theme">ⓘ</button>
         </label>
-          <input type="text" id="theme"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-            placeholder="{{ theme }}" required value="Next Generation Defense" />
+        <input type="text" id="theme"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
+          placeholder="{{ theme }}" required value="Next Generation Defense" />
       </div>
 
       <div class="mb-5">
         <label for="focus" class="block mb-2 font-bold text-md text-white">
-            <span>Focus:</span>
+          <span>Focus:</span>
           <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('focus')"
             title="Info about Focus">ⓘ</button>
         </label>
-          <textarea id="focus"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-            placeholder="{{ focus }}" required>Artificial intelligence, autonomous systems, Space-Based Military Technology</textarea>
+        <textarea id="focus" class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
+          placeholder="{{ focus }}"
+          required>Artificial intelligence, autonomous systems, Space-Based Military Technology</textarea>
       </div>
-      <!--
+
       <div class="mb-5">
         <label for="companies" class="block mb-2 font-bold text-md text-white">
-            <span>Company Universe (either a comma separated RavenPack IDs or a watchlist ID):</span>
+          <span>Company Universe:</span>
           <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('companies')"
             title="Info about Company Universe">ⓘ</button>
         </label>
-          <input type="text" id="companies"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-            placeholder="{{ companies }}" required value="{{ companies }}" />
-      </div>
-      -->
-
-        <div class="mb-5">
-          <label for="companies" class="block mb-2 font-bold text-md text-white">
-            <span>Company Universe:</span>
-            <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('companies')"
-              title="Info about Company Universe">ⓘ</button>
-          </label>
-          <p class="mt-2 text-sm text-white">Select one of the public watchlists from the dropdown</p>
-          <p class="mt-2 text-sm text-white">or</p>
-          <p class="mt-2 text-sm text-white pb-1">input a watchlist id or rp_entity_id list.</p>
-          <div class="relative"> <!-- dropdown -->
-          <input id="companies_text" type="text" class="absolute w-[calc(100%-20px)] bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block p-2.5" />
-          <select id="companies" class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5" onchange="this.previousElementSibling.value=this.options[this.selectedIndex].text; this.previousElementSibling.focus()">
-          <!-- Options are added in a javascript-->
+        <div class="relative"> <!-- dropdown -->
+          <input id="companies_text" type="text"
+            class="absolute w-[calc(100%-20px)] bg-gray-50 text-gray-900 text-md rounded-lg block p-2.5 h-[42px]" />
+          <select id="companies"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 h-[42px] z-10"
+            onchange="this.previousElementSibling.value=this.options[this.selectedIndex].text;"
+            onclick="console.log('HOla');">
+            <!-- Options are added in a javascript-->
           </select>
-          </div>
-        </div>      
+        </div>
+      </div>
 
       <button type="button" onclick="toggleAdvancedOptions()" id="advancedOptionsBtn"
-        class="flex items-center gap-2 text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-base px-3 py-1.5 mb-2 transition-colors duration-200">
+        class="flex items-center gap-2 text-white bg-gray-600 hover:bg-gray-700 font-medium rounded-lg text-base px-3 py-1.5 mb-2 transition-colors duration-200">
         <span id="advancedOptionsIcon" class="text-2xl font-bold">+</span>
         <span>Advanced Options</span>
       </button>
@@ -66,13 +56,13 @@
       <div id="advanced-options" class="hidden mt-4">
         <div class="mb-5">
           <label for="start_date" class="block mb-2 font-bold text-md text-white">
-              <span>Start Date:</span>
+            <span>Start Date:</span>
             <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('start_date')"
               title="Info about Start Date">ⓘ</button>
           </label>
-            <input type="date" id="start_date"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-              placeholder="{{ start_date }}" required value="{{ start_date }}" />
+          <input type="date" id="start_date"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
+            placeholder="{{ start_date }}" required value="{{ start_date }}" />
         </div>
 
         <div class="mb-5">
@@ -94,11 +84,11 @@
           </label>
           <select id="frequency"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5">
-            <option value="D" {% if frequency=='D' %}{% endif %}>Daily</option>
-            <option value="W" {% if frequency=='W' %}{% endif %}>Weekly</option>
-            <option value="M" {% if frequency=='M' %}{% endif %}>Monthly</option>
-            <option value="3M" {% if frequency=='3M' %}{% endif %} selected >Quarterly</option>
-            <option value="Y" {% if frequency=='Y' %}{% endif %}>Yearly</option>
+            <option value="D">Daily</option>
+            <option value="W">Weekly</option>
+            <option value="M">Monthly</option>
+            <option value="3M" selected>Quarterly</option>
+            <option value="Y">Yearly</option>
           </select>
         </div>
 
@@ -180,18 +170,44 @@
         class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center">Run
         Screener</button>
     </form>
+    </div>
     <div id="spinner" class="hidden p-2.5">⏳ Running...</div>
 
   </div>
   <!-- Right: Output -->
-  <div class="w-5/6 min-w-[300px] bg-zinc-900 p-8">
-    <button id="showJsonBtn" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center mb-4" style="display:none;">Show raw JSON</button>
+  <div class="w-5/6 min-w-[300px] bg-zinc-900 p-8 rounded-r-lg">
+    <button id="showJsonBtn"
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center mb-4"
+      style="display:none;">Show raw JSON</button>
     <div id="output" class="w-full">
-      <div class="flex flex-col items-center justify-center h-full py-12">
+      <div class="flex flex-col h-full py-5">
         <h1 class="text-3xl font-bold text-white mb-4">Thematic Screener</h1>
-        <p class="text-lg text-white mb-2 text-center">Experiment with thematic screening using comprehensive filters and neural tools</p>
-        <p class="text-base text-white mb-6 text-center">Configure your thematic screener parameters in the sidebar and click <span class="font-semibold">Run Screener</span> to begin analysis.</p>
-        <p class="text-white text-center italic">Results will appear here once the screener is executed.</p>
+        <p class="mb-4">
+          Systematically connects companies to investment themes using unstructured data 
+          from millions of documents.
+        </p>
+
+        <h2 class="text-2xl font-bold text-white mb-4">HOW TO USE:</h2>
+        <ol class="list-decimal mb-4 pl-6">
+          <li>Configure your screening parameters in the sidebar</li>
+          <li>Click <strong>"Run Screener"</strong> to begin analysis</li>
+          <li>Monitor the logs below to see the process working in the background</li>
+          <li>Results will appear below once processing is complete</li>
+        </ol>
+
+        <h2 class="text-2xl font-bold text-white mb-4">CURRENT LIMITATIONS:</h2>
+        <ul class="list-disc mb-4 pl-6">
+          <li>Demo version retrieves <strong>TRANSCRIPT</strong> documents only, restricted to 4 temporal buckets (e.g., 4 quarters)</li>
+          <li>Processing may take a few minutes for complex queries</li>
+          <li>This is an experimental tool – results should be validated independently before making investment decisions</li>
+        </ul>
+
+        <p class="">
+        Check our repo 
+        <a href="https://github.com/Bigdata-com/bigdata-cookbook" target="_blank" class="font-bold hover:text-blue-200">
+          https://github.com/Bigdata-com/bigdata-cookbook
+        </a> for the complete and customizable version.
+        </p>
       </div>
     </div>
   </div>
@@ -207,10 +223,13 @@
 <!-- Modal for JSON output -->
 <div id="jsonModal" class="hidden fixed z-[1000] inset-0 w-screen h-screen bg-black/50">
   <div class="bg-white relative my-20 mx-auto p-5 rounded-lg w-4/5 max-w-[900px]">
-    <button id="copyBtn" onclick="copyJson()" class="absolute top-[10px] right-[50px] text-[15px] px-[10px] py-[4px] cursor-pointer text-gray-900">Copy</button>
+    <button id="copyBtn" onclick="copyJson()"
+      class="absolute top-[10px] right-[50px] text-[15px] px-[10px] py-[4px] cursor-pointer text-gray-900">Copy</button>
     <button onclick="closeModal()" class="absolute top-2.5 right-2.5 text-lg text-gray-900">&times;</button>
     <h2 class="text-gray-900">Raw JSON Output</h2>
-    <pre id="jsonContent" class="bg-gray-900 text-gray-100 p-4 whitespace-pre-wrap break-words overflow-auto rounded-md mt-5" style="max-height:60vh;"></pre>
+    <pre id="jsonContent"
+      class="bg-gray-900 text-gray-100 p-4 whitespace-pre-wrap break-words overflow-auto rounded-md mt-5"
+      style="max-height:60vh;"></pre>
   </div>
 </div>
 
@@ -219,7 +238,7 @@
   const infoContents = {
     theme: `<b>Theme</b>:<br>The main theme, topic, or trend you want to screen for exposure. It can be specified as a single word or as a short sentence. The Screener will generate a list of sub-themes representing individual, self contained components of the main theme. The theme can contain multiple core concepts, but we would recommend not adding too many core concepts in the same screener run.<br><i>Examples: "Artificial Intelligence", "Supply Chain Reshaping", "Energy Transition"</i>`,
     focus: `<b>Focus</b>:<br> Use this parameter to pass additional, custom instructions to the llm when breaking down the theme into sub-themes. These parameters allow you to guide the mindmap creation and customize it to your needs, as it allows users to inject their own domain knowledge, your specific point of view, and it will ensure that the mindmap will focus on the core concepts required.`,
-    companies: `<b>Company Universe</b>:<br>The portfolio of companies you want to screen for exposure, either as a list of RavenPack entity IDs (e.g., <code>4A6F00, D8442A</code>) or a watchlist ID (e.g., <code>44118802-9104-4265-b97a-2e6d88d74893</code> ). Watchlists can be created programmatically using the <a href='https://docs.bigdata.com/getting-started/watchlist_management' target='_blank'>Bigdata.com SDK</a> or through the <a href='https://app.bigdata.com/watchlists' target='_blank'>Bigdata app</a>.`,
+    companies: `<b>Company Universe</b>:<br>The portfolio of companies you want to screen for exposure, you have several input options:<br><ul class="list-disc pl-6"><li>Select one of the public watchlists using the dropdown menu</li><li>Write list of RavenPack entity IDs (e.g., <code>4A6F00, D8442A</code>)</li><li>Input a watchlist ID (e.g., <code>44118802-9104-4265-b97a-2e6d88d74893</code> )</li></ul><br>Watchlists can be created programmatically using the <a href='https://docs.bigdata.com/getting-started/watchlist_management' target='_blank'>Bigdata.com SDK</a> or through the <a href='https://app.bigdata.com/watchlists' target='_blank'>Bigdata app</a>.`,
     start_date: `<b>Start/End Date</b>:<br>The start and end of the time sample during which you want to screen your portfolio for thematic exposure. Format: <code>YYYY-MM-DD</code>.`,
     document_type: `<b>Document Type</b>:<br>The type of documents to search over. Use this to analyze text data from news, corporate transcripts, or filings. Currently, only "TRANSCRIPTS" is supported.`,
     fiscal_year: `<b>Fiscal Year</b>:<br>For Transcripts and Filings, filter documents by their reporting details. <b>fiscal_year</b> represents the annual reporting period and can be combined with <b>start_date</b> and <b>end_date</b> for time-sensitive queries. Not applicable to News.`,
@@ -227,22 +246,22 @@
     frequency: `<b>Frequency</b>:<br>Break down your sample range into higher frequency intervals (<code>D</code>, <code>Y</code>, <code>M</code>, <code>3M</code>, <code>Y</code>). Useful for large samples to control document retrieval over time.`,
     llm_model: `<b>LLM Model</b>:<br>The LLM model to be used for mindmap generation and text analysis. It has to be specified as a string containing both provider name and model name separated by two colons: <provider::model>.`,
     document_limit: `<b>Document Limit</b>:<br>The maximum number of documents to be retrieved by each query. This is a single value that applies to any combination of query statement & date range.`,
-    batch_size: `<b>Batch Size</b>:<br>Set this parameter when screening a large portfolio of companies (i.e. 50 or more). It allows to break down the portfolio into smaller batches of fixed size, and instructs the search service to run parallel queries for each and every batch. This allows for improving the sampling across your portfolio, given the document limit constraint that has to be applied per query.`
+    batch_size: `<b>Batch Size</b>:<br>Set this parameter when screening a large portfolio of companies (i.e. 50 or more). It allows to break down the portfolio into smaller batches of fixed size, and instructs the search service to run parallel queries for each and every batch. This allows for improving the sampling across your portfolio, given the document limit constraint that has to be applied per query.`,
+    headline_comment: `<b>Headline</b>:<br>Click on each headline to retrieve the DOCUMENT ID. The DOCUMENT ID identifies the document that contains that  headline.`,
   };
 
-      const watchlists = [
-    {"watchlist_id": "beda15f2-b3ba-44dd-80c6-79d8a1bba764", "name": "Militarization"},
-    {"watchlist_id": "44118802-9104-4265-b97a-2e6d88d74893", "name": "US Large Cap 100"},
-    {"watchlist_id": "f7801965-ed54-4ff1-b524-b4ecee3bc858", "name": "High Finance"},
-    {"watchlist_id": "ec300f6f-64f0-4897-9f63-82e8d60a7e5a", "name": "Third Point Holdings"},
-    {"watchlist_id": "ccfe5dc2-0c92-42d7-861c-1d8ee74a9e02", "name": "The Street Index"},
-    {"watchlist_id": "db8478c9-34db-4975-8e44-b1ff764098ac", "name": "AI Szn"}
-    // ...more watchlists
+  const watchlists = [
+    { "watchlist_id": "beda15f2-b3ba-44dd-80c6-79d8a1bba764", "name": "Militarization" },
+    { "watchlist_id": "44118802-9104-4265-b97a-2e6d88d74893", "name": "US Large Cap 100" },
+    { "watchlist_id": "f7801965-ed54-4ff1-b524-b4ecee3bc858", "name": "High Finance" },
+    { "watchlist_id": "ec300f6f-64f0-4897-9f63-82e8d60a7e5a", "name": "Third Point Holdings" },
+    { "watchlist_id": "ccfe5dc2-0c92-42d7-861c-1d8ee74a9e02", "name": "The Street Index" },
+    { "watchlist_id": "db8478c9-34db-4975-8e44-b1ff764098ac", "name": "AI Szn" }
   ];
 
   // Calculate dates for start_date and end_date
   const today = new Date();
-  const sixMonthsAgo = new Date();    
+  const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   sixMonthsAgo.setDate(1);
 
@@ -264,19 +283,19 @@
   } else {
     document.getElementById('fiscal_year').value = String(today.getFullYear() - 1);
   }
-  
+
   // Populate the dropdown with watchlists
   const comp_select = document.getElementById('companies');
   const comp_text = document.getElementById('companies_text');
-  watchlists.forEach((watchlist,index) => {
+  watchlists.forEach((watchlist, index) => {
     if (index === 0) {
       comp_text.value = watchlist.name;
-    }        
+    }
     const option = document.createElement('option');
-    option.value = watchlist.id;
+    option.value = watchlist.watchlist_id;
     option.textContent = watchlist.name;
     comp_select.appendChild(option);
-  });  
+  });
 
   function showInfoModal(label) {
     let container = document.getElementById('infoModalsContainer');
@@ -302,17 +321,17 @@
         </div>
       </div>
     `;
-  }  
+  }
 
-    function escapeHtml(text) {
-      if (text === null || text === undefined) return '';
-      const str = String(text);
-      return str.replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-    }  
+  function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    const str = String(text);
+    return str.replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
   function toggleAdvancedOptions() {
     var adv = document.getElementById('advanced-options');
@@ -423,16 +442,13 @@
         throw new Error(`HTTP error ${response.status}`);
       }
       const data = await response.json();
-      // output.innerHTML = renderScreenerReport(data);
-      // showJsonBtn.style.display = 'inline-block';
-
       // Start polling status endpoint every 5 seconds using request_id
       if (data && data.request_id) {
         const requestId = data.request_id;
         let polling = true;
         const logViewer = document.getElementById('logViewer');
         async function pollStatus() {
-          
+
           try {
             const statusResp = await fetch(`/status/${requestId}`);
             if (!statusResp.ok) {
@@ -456,8 +472,6 @@
             } else {
               logViewer.textContent = 'No logs yet.';
             }
-            // Also show statusData in output
-            //output.innerHTML = `<pre>${JSON.stringify(statusData, null, 2)}</pre>`;
             // Stop polling if status is 'completed' or 'failed'
             if (statusData.status === 'completed' || statusData.status === 'failed') {
               polling = false;
@@ -483,152 +497,149 @@
     } catch (err) {
       output.innerHTML = `<span class="error">❌ Error: ${err.message}</span>`;
       output.classList.add('error');
-    } finally {
-      //submitBtn.disabled = false;
-      //submitBtn.textContent = 'Run Screener';
-      //spinner.style.display = 'none';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Run Screener';
+      spinner.style.display = 'none';
     }
   };
 
-  document.getElementById('showJsonBtn').onclick = function() {
-      if (lastReport) {
-        document.getElementById('jsonContent').textContent = JSON.stringify(lastReport, null, 2);
-        document.getElementById('jsonModal').style.display = 'block';
-      }
-    };
+  document.getElementById('showJsonBtn').onclick = function () {
+    if (lastReport) {
+      document.getElementById('jsonContent').textContent = JSON.stringify(lastReport, null, 2);
+      document.getElementById('jsonModal').style.display = 'block';
+    }
+  };
 
-function renderScreenerReport(data) {
-      if (!data || typeof data !== 'object') return '<span class="error">No data to display.</span>';
-      let html = '<h2 class="text-3xl font-bold text-white mb-4">Thematic Screener Result</h2>';
+  function renderScreenerReport(data) {
+    if (!data || typeof data !== 'object') return '<span class="error">No data to display.</span>';
+    let html = '<h2 class="text-3xl font-bold text-white mb-4">Thematic Screener Result</h2>';
 
-      // Render theme_scoring (dict of ticker -> CompanyScoring)
-      if (data.theme_scoring && data.theme_scoring) {
-        html += '<h3 class="text-2xl font-bold text-white mb-2">Theme Scoring</h3>';
-        html += '<div class="max-h-[500px] overflow-y-auto">'
-        html += '<table class="table-auto">';
-        html += '<tr>';
-        // Dynamically create theme columns
-        let allThemes = new Set();
-        for (const scoring of Object.values(data.theme_scoring)) {
-          if (scoring.themes) {
-            Object.keys(scoring.themes).forEach(theme => allThemes.add(theme));
-          }
+    // Render theme_scoring (dict of ticker -> CompanyScoring)
+    if (data.theme_scoring && data.theme_scoring) {
+      html += '<h3 class="text-2xl font-bold text-white mb-2">Theme Scoring</h3>';
+      html += '<div class="max-h-[500px] overflow-y-auto">'
+      html += '<table class="table-auto">';
+      html += '<tr>';
+      // Dynamically create theme columns
+      let allThemes = new Set();
+      for (const scoring of Object.values(data.theme_scoring)) {
+        if (scoring.themes) {
+          Object.keys(scoring.themes).forEach(theme => allThemes.add(theme));
         }
-        const themeList = Array.from(allThemes);
-        html += '<th class="sticky top-0 z-10 bg-zinc-900">Ticker</th><th class="sticky top-0 z-10 bg-zinc-900">Industry</th><th class="sticky top-0 z-10 bg-zinc-900">Composite Score</th><th class="sticky top-0 z-10 bg-zinc-900">Motivation</th>';
+      }
+      const themeList = Array.from(allThemes);
+      html += '<th class="sticky top-0 z-10 bg-zinc-900">Ticker</th><th class="sticky top-0 z-10 bg-zinc-900">Industry</th><th class="sticky top-0 z-10 bg-zinc-900">Composite Score</th><th class="sticky top-0 z-10 bg-zinc-900">Motivation</th>';
+      themeList.forEach(theme => {
+        html += `<th class="sticky top-0 z-10 bg-zinc-900">${escapeHtml(theme)}</th>`;
+      });
+      html += '</tr>';
+      for (const [ticker, scoring] of Object.entries(data.theme_scoring)) {
+        html += '<tr class="divide-y divide-white">';
+        html += `<td>${escapeHtml(scoring.ticker)}</td>`;
+        html += `<td>${escapeHtml(scoring.industry)}</td>`;
+        html += `<td>${escapeHtml(scoring.composite_score)}</td>`;
+        html += `<td>${escapeHtml(scoring.motivation)}</td>`;
+        // Explode themes into columns
         themeList.forEach(theme => {
-          html += `<th class="sticky top-0 z-10 bg-zinc-900">${escapeHtml(theme)}</th>`;
+          if (scoring.themes && theme in scoring.themes) {
+            html += `<td>${escapeHtml(scoring.themes[theme])}</td>`;
+          } else {
+            html += '<td></td>';
+          }
         });
         html += '</tr>';
-        for (const [ticker, scoring] of Object.entries(data.theme_scoring)) {
-          html += '<tr class="divide-y divide-white">';
-          html += `<td>${escapeHtml(scoring.ticker)}</td>`;
-          html += `<td>${escapeHtml(scoring.industry)}</td>`;
-          html += `<td>${escapeHtml(scoring.composite_score)}</td>`;
-          html += `<td>${escapeHtml(scoring.motivation)}</td>`;
-          // Explode themes into columns
-          themeList.forEach(theme => {
-            if (scoring.themes && theme in scoring.themes) {
-              html += `<td>${escapeHtml(scoring.themes[theme])}</td>`;
-            } else {
-              html += '<td></td>';
-            }
-          });
-          html += '</tr>';
-        }
-        html += '</table>';
-        html += '</div>'
       }
+      html += '</table>';
+      html += '</div>'
+    }
 
-      // Render theme_taxonomy (tree)
-      function renderTaxonomy(node, depth=0) {
-        if (!node) return '';
-        let pad = '&nbsp;'.repeat(depth * 4);
-        let html = `${pad}<b>${escapeHtml(node.label)}</b> (Node: ${escapeHtml(node.node)})`;
-        if (node.summary) html += ` - ${escapeHtml(node.summary)}`;
-        if (node.children && node.children.length) {
-          html += '<ul>';
-          for (const child of node.children) {
-            html += '<li>' + renderTaxonomy(child, depth+1) + '</li>';
-          }
-          html += '</ul>';
+    // Render theme_taxonomy (tree)
+    function renderTaxonomy(node, depth = 0) {
+      if (!node) return '';
+      let pad = '&nbsp;'.repeat(depth * 4);
+      let html = `${pad}<b>${escapeHtml(node.label)}</b> (Node: ${escapeHtml(node.node)})`;
+      if (node.summary) html += ` - ${escapeHtml(node.summary)}`;
+      if (node.children && node.children.length) {
+        html += '<ul>';
+        for (const child of node.children) {
+          html += '<li>' + renderTaxonomy(child, depth + 1) + '</li>';
         }
-        return html;
-      }
-      if (data.theme_taxonomy) {
-        html += '<h3 class="text-2xl font-bold text-white mb-2">Theme Taxonomy</h3>';
-        html += '<div class="table-main p-4">' + renderTaxonomy(data.theme_taxonomy) + '</div>';
-      }
-
-      // Render content (list of LabeledChunk)
-      if (data.content && Array.isArray(data.content) && data.content.length) {
-        html += '<h3 class="text-2xl font-bold text-white mb-2">Labeled Content</h3>';
-        html += '<div class="max-h-[500px] overflow-y-auto">'
-        html += '<table class="table-auto">';
-        html += '<tr>';
-        //html += '<th class="sticky top-0 z-10 bg-zinc-900">Time Period</th><th class="sticky top-0 z-10 bg-zinc-900">Date</th><th class="sticky top-0 z-10 bg-zinc-900">Company</th><th class="sticky top-0 z-10 bg-zinc-900">Sector</th><th class="sticky top-0 z-10 bg-zinc-900">Industry</th><th class="sticky top-0 z-10 bg-zinc-900">Country</th><th class="sticky top-0 z-10 bg-zinc-900">Ticker</th><th class="sticky top-0 z-10 bg-zinc-900">Document ID</th><th class="sticky top-0 z-10 bg-zinc-900">Headline</th><th class="sticky top-0 z-10 bg-zinc-900">Quote</th><th class="sticky top-0 z-10 bg-zinc-900">Motivation</th><th class="sticky top-0 z-10 bg-zinc-900">Theme</th>';
-        html += '<th class="sticky top-0 z-10 bg-zinc-900">Time Period</th><th class="sticky top-0 z-10 bg-zinc-900">Date</th><th class="sticky top-0 z-10 bg-zinc-900">Company</th><th class="sticky top-0 z-10 bg-zinc-900">Sector</th><th class="sticky top-0 z-10 bg-zinc-900">Industry</th><th class="sticky top-0 z-10 bg-zinc-900">Country</th><th class="sticky top-0 z-10 bg-zinc-900">Ticker</th><th class="sticky top-0 z-10 bg-zinc-900"><span>Headline</span><span class="text-sm text-zinc-400">(click to show the document id)</span></th><th class="sticky top-0 z-10 bg-zinc-900">Quote</th><th class="sticky top-0 z-10 bg-zinc-900">Motivation</th><th class="sticky top-0 z-10 bg-zinc-900">Theme</th>';
-        html += '</tr>';
-        for (const chunk of data.content) {
-          html += '<tr class="divide-y divide-white">';
-          html += `<td>${escapeHtml(chunk.time_period)}</td>`;
-          html += `<td>${escapeHtml(chunk.date)}</td>`;
-          html += `<td>${escapeHtml(chunk.company)}</td>`;
-          html += `<td>${escapeHtml(chunk.sector)}</td>`;
-          html += `<td>${escapeHtml(chunk.industry)}</td>`;
-          html += `<td>${escapeHtml(chunk.country)}</td>`;
-          html += `<td>${escapeHtml(chunk.ticker)}</td>`;
-          //html += `<td>${escapeHtml(chunk.document_id)}</td>`;
-          html += `<td onclick="showDocumentModal('${chunk.document_id}')">${escapeHtml(chunk.headline)}</td>`;
-          html += `<td>${escapeHtml(chunk.quote)}</td>`;
-          html += `<td>${escapeHtml(chunk.motivation)}</td>`;
-          html += `<td>${escapeHtml(chunk.theme)}</td>`;
-          html += '</tr>';
-        }
-        html += '</table>';
-        html += '</div>'
+        html += '</ul>';
       }
       return html;
-    };
-    
-function closeModal() {
-      document.getElementById('jsonModal').style.display = 'none';
     }
-    window.closeModal = closeModal;
-    function copyJson() {
-      const jsonContent = document.getElementById('jsonContent');
-      if (!jsonContent) return;
-      const text = jsonContent.innerText || jsonContent.textContent;
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(() => {
-          const btn = document.getElementById('copyBtn');
-          if (btn) {
-            const orig = btn.textContent;
-            btn.textContent = 'Copied!';
-            setTimeout(() => { btn.textContent = orig; }, 1200);
-          }
-        });
-      } else {
-        // fallback for older browsers
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'absolute';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-          document.execCommand('copy');
-          const btn = document.getElementById('copyBtn');
-          if (btn) {
-            const orig = btn.textContent;
-            btn.textContent = 'Copied!';
-            setTimeout(() => { btn.textContent = orig; }, 1200);
-          }
-        } catch (err) {}
-        document.body.removeChild(textarea);
+    if (data.theme_taxonomy) {
+      html += '<h3 class="text-2xl font-bold text-white mb-2">Theme Taxonomy</h3>';
+      html += '<div class="table-main p-4">' + renderTaxonomy(data.theme_taxonomy) + '</div>';
+    }
+
+    // Render content (list of LabeledChunk)
+    if (data.content && Array.isArray(data.content) && data.content.length) {
+      html += '<h3 class="text-2xl font-bold text-white mb-2">Labeled Content</h3>';
+      html += '<div class="max-h-[500px] overflow-y-auto">'
+      html += '<table class="table-auto">';
+      html += '<tr>';
+      html += '<th class="sticky top-0 z-10 bg-zinc-900">Time Period</th><th class="sticky top-0 z-10 bg-zinc-900">Date</th><th class="sticky top-0 z-10 bg-zinc-900">Company</th><th class="sticky top-0 z-10 bg-zinc-900">Sector</th><th class="sticky top-0 z-10 bg-zinc-900">Industry</th><th class="sticky top-0 z-10 bg-zinc-900">Country</th><th class="sticky top-0 z-10 bg-zinc-900">Ticker</th><th class="sticky top-0 z-10 bg-zinc-900"><span>Headline</span><span><button type="button" class="text-blue-500 text-sm" onclick=showInfoModal(\'headline_comment\') title="Info">ⓘ</button></span></th><th class="sticky top-0 z-10 bg-zinc-900">Quote</th><th class="sticky top-0 z-10 bg-zinc-900">Motivation</th><th class="sticky top-0 z-10 bg-zinc-900">Theme</th>';
+      html += '</tr>';
+      for (const chunk of data.content) {
+        html += '<tr class="divide-y divide-white">';
+        html += `<td>${escapeHtml(chunk.time_period)}</td>`;
+        html += `<td>${escapeHtml(chunk.date)}</td>`;
+        html += `<td>${escapeHtml(chunk.company)}</td>`;
+        html += `<td>${escapeHtml(chunk.sector)}</td>`;
+        html += `<td>${escapeHtml(chunk.industry)}</td>`;
+        html += `<td>${escapeHtml(chunk.country)}</td>`;
+        html += `<td>${escapeHtml(chunk.ticker)}</td>`;
+        html += `<td onclick="showDocumentModal('${chunk.document_id}')">${escapeHtml(chunk.headline)}</td>`;
+        html += `<td>${escapeHtml(chunk.quote)}</td>`;
+        html += `<td>${escapeHtml(chunk.motivation)}</td>`;
+        html += `<td>${escapeHtml(chunk.theme)}</td>`;
+        html += '</tr>';
       }
-    };    
+      html += '</table>';
+      html += '</div>'
+    }
+    return html;
+  };
+
+  function closeModal() {
+    document.getElementById('jsonModal').style.display = 'none';
+  }
+  window.closeModal = closeModal;
+  function copyJson() {
+    const jsonContent = document.getElementById('jsonContent');
+    if (!jsonContent) return;
+    const text = jsonContent.innerText || jsonContent.textContent;
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = orig; }, 1200);
+        }
+      });
+    } else {
+      // fallback for older browsers
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'absolute';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const btn = document.getElementById('copyBtn');
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = orig; }, 1200);
+        }
+      } catch (err) { }
+      document.body.removeChild(textarea);
+    }
+  };    
 </script>
 </form>
 {% endblock %}
