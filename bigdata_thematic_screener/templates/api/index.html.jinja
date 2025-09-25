@@ -541,7 +541,7 @@
         async function pollStatus() {
 
           try {
-            const statusResp = await fetch(`/status/${requestId}`);
+            const statusResp = await fetch(`/status/${requestId}?${params}`);
             if (!statusResp.ok) {
               throw new Error(`Status HTTP error ${statusResp.status}`);
             }
