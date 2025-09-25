@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Changed endpoints to be asynchronous. `/thematic-screener` will now return a `request_id` immediately, and progress updated and the result can be fetched later using `/status/{request_id}`.
 - Updated document type enum to be consistent with the Bigdata.com SDK
+- Updated front end to deal with the async endpoint.
 
 ## [1.1.0] - 11-09-2025
 
