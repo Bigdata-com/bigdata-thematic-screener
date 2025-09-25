@@ -1,14 +1,17 @@
 import math
 from datetime import datetime
 from importlib.metadata import version
+from uuid import UUID
 
 import pandas as pd
 from bigdata_client import Bigdata
 from bigdata_client.models.entities import Company
-from bigdata_client.models.search import DocumentType
 from bigdata_research_tools.themes import ThemeTree
+from bigdata_research_tools.utils.observer import OberserverNotification, Observer
 from bigdata_research_tools.workflows.thematic_screener import ThematicScreener
 
+from bigdata_thematic_screener.api.models import ThematicScreenRequest, WorkflowStatus
+from bigdata_thematic_screener.api.storage import StorageManager
 from bigdata_thematic_screener.models import (
     CompanyScoring,
     LabeledChunk,
@@ -19,6 +22,18 @@ from bigdata_thematic_screener.models import (
     ThemeTaxonomy,
 )
 from bigdata_thematic_screener.traces import TraceEventName, send_trace
+
+
+class WorkflowObserver(Observer):
+    def __init__(self, request_id: UUID, storage_manager: StorageManager):
+        self.request_id = request_id
+        self.storage_manager = storage_manager
+
+    def update(self, message: OberserverNotification):
+        self.storage_manager.log_message(
+            request_id=self.request_id,
+            message=message.message,
+        )
 
 
 def prepare_companies(
@@ -112,70 +127,81 @@ def build_response(
 
 
 def process_request(
-    companies: list[str] | str,
-    llm_model: str,
-    theme: str,
-    focus: str | None,
-    start_date: str,
-    end_date: str,
-    document_type: DocumentType,
-    fiscal_year: int | None,
-    rerank_threshold: float | None,
-    frequency: str,
-    document_limit: int,
-    batch_size: int,
+    request: ThematicScreenRequest,
     bigdata: Bigdata | None,
+    request_id: UUID,
+    storage_manager: StorageManager,
 ):
-    if not bigdata:
-        raise ValueError("Bigdata client is not initialized.")
+    try:    
+        storage_manager.update_status(request_id, WorkflowStatus.IN_PROGRESS)
+        if not bigdata:
+            raise ValueError("Bigdata client is not initialized.")
 
-    # Research tools marks it as optional, but expects an empty screen if not available
-    if focus is None:
-        focus = ""
+        # Research tools marks it as optional, but expects an empty screen if not available
+        if request.focus is None:
+            request.focus = ""
 
-    workflow_execution_start = datetime.now()
+        workflow_execution_start = datetime.now()
 
-    resolved_companies = prepare_companies(companies, bigdata)
+        resolved_companies = prepare_companies(request.companies, bigdata)
+        
 
-    thematic_screener = ThematicScreener(
-        llm_model=llm_model,
-        main_theme=theme,
-        focus=focus,
-        companies=resolved_companies,
-        start_date=start_date,
-        end_date=end_date,
-        document_type=document_type,
-        fiscal_year=fiscal_year,
-        rerank_threshold=rerank_threshold,
-    )
+        thematic_screener = ThematicScreener(
+            llm_model=request.llm_model,
+            main_theme=request.theme,
+            focus=request.focus,
+            companies=resolved_companies,
+            start_date=request.start_date,
+            end_date=request.end_date,
+            document_type=request.document_type,
+            fiscal_year=request.fiscal_year,
+            rerank_threshold=request.rerank_threshold,
+        )
 
-    results = thematic_screener.screen_companies(
-        document_limit=document_limit,
-        batch_size=batch_size,
-        frequency=frequency,
-    )
-    df_labeled = results["df_labeled"]
-    df_company = results["df_company"]
-    df_motivation = results["df_motivation"]
-    theme_tree = results["theme_tree"]
+        thematic_screener.register_observer(
+            WorkflowObserver(request_id=request_id, storage_manager=storage_manager)
+        )
 
-    workflow_execution_end = datetime.now()
+        results = thematic_screener.screen_companies(
+            document_limit=request.document_limit,
+            batch_size=request.batch_size,
+            frequency=request.frequency.value,
+        )
+        df_labeled = results["df_labeled"]
+        df_company = results["df_company"]
+        df_motivation = results["df_motivation"]
+        theme_tree = results["theme_tree"]
 
-    # Send log
-    send_trace(
-        bigdata,
-        event_name=TraceEventName.THEMATIC_SCREENER_REPORT_GENERATED,
-        trace={
-            "bigdataClientVersion": version("bigdata-client"),
-            "workflowStartDate": workflow_execution_start.isoformat(timespec="seconds"),
-            "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
-            "watchlistLength": len(resolved_companies),
-        },
-    )
+        workflow_execution_end = datetime.now()
 
-    return build_response(
-        df_company=df_company,
-        df_motivation=df_motivation,
-        df_labeled=df_labeled,
-        theme_tree=theme_tree,
-    )
+        # Send log
+        send_trace(
+            bigdata,
+            event_name=TraceEventName.THEMATIC_SCREENER_REPORT_GENERATED,
+            trace={
+                "bigdataClientVersion": version("bigdata-client"),
+                "workflowStartDate": workflow_execution_start.isoformat(timespec="seconds"),
+                "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
+                "watchlistLength": len(resolved_companies),
+            },
+        )
+
+        response = build_response(
+            df_company=df_company,
+            df_motivation=df_motivation,
+            df_labeled=df_labeled,
+            theme_tree=theme_tree,
+        )
+
+        storage_manager.mark_workflow_as_completed(request_id, request, response)
+        
+        return response
+    
+    except Exception as e:
+        storage_manager.log_message(
+            request_id=request_id,
+            message=f"Workflow failed with error: {str(e)}",
+        )
+        storage_manager.update_status(request_id, WorkflowStatus.FAILED)
+        raise e
+    

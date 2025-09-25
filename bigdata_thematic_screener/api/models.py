@@ -2,15 +2,10 @@ from datetime import date, datetime, timedelta
 from enum import StrEnum
 from typing import Literal, Optional
 
+from bigdata_client.models.search import DocumentType
 from pydantic import BaseModel, Field, model_validator
 
-
-class DocumentTypeEnum(StrEnum):
-    ALL = "ALL"
-    FILINGS = "FILINGS"
-    TRANSCRIPTS = "TRANSCRIPTS"
-    NEWS = "NEWS"
-    FILES = "FILES"
+from bigdata_thematic_screener.models import ThematicScreenerResponse
 
 
 def two_months_ago() -> date:
@@ -27,6 +22,13 @@ class FrequencyEnum(StrEnum):
     monthly = "M"
     quarterly = "3M"
     yearly = "Y"
+
+
+class WorkflowStatus(StrEnum):
+    QUEUED = "queued"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class ThematicScreenRequest(BaseModel):
@@ -63,8 +65,8 @@ class ThematicScreenRequest(BaseModel):
         example=2024,
     )
 
-    document_type: Literal[DocumentTypeEnum.TRANSCRIPTS] = Field(
-        default=DocumentTypeEnum.TRANSCRIPTS,
+    document_type: Literal[DocumentType.TRANSCRIPTS] = Field(
+        default=DocumentType.TRANSCRIPTS,
         description="Type of documents to analyze (only transcript supported for now).",
     )
     rerank_threshold: Optional[float] = Field(
@@ -102,14 +104,14 @@ class ThematicScreenRequest(BaseModel):
         doc_type = values.get("document_type", None)
         if doc_type is None:
             raise ValueError("document_type must be specified.")
-        if doc_type.upper() not in DocumentTypeEnum.__members__:
+        if doc_type.upper() not in DocumentType.__members__:
             raise ValueError(
-                f"Invalid document_type: {doc_type}, possible values are: {list(DocumentTypeEnum.__members__.keys())}"
+                f"Invalid document_type: {doc_type}, possible values are: {list(DocumentType.__members__.keys())}"
             )
-        doc_type = DocumentTypeEnum[doc_type.upper()]
+        doc_type = DocumentType[doc_type.upper()]
         if doc_type in [
-            DocumentTypeEnum.TRANSCRIPTS,
-            DocumentTypeEnum.FILINGS,
+            DocumentType.TRANSCRIPTS,
+            DocumentType.FILINGS,
         ] and not values.get("fiscal_year"):
             raise ValueError(
                 "fiscal_year must be specified when document_type is TRANSCRIPT or FILING."
@@ -118,8 +120,8 @@ class ThematicScreenRequest(BaseModel):
             doc_type
             and doc_type
             not in [
-                DocumentTypeEnum.TRANSCRIPTS,
-                DocumentTypeEnum.FILINGS,
+                DocumentType.TRANSCRIPTS,
+                DocumentType.FILINGS,
             ]
             and values.get("fiscal_year") is not None
         ):
@@ -146,3 +148,16 @@ class ThematicScreenRequest(BaseModel):
                 f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
             )
         return values
+
+
+class ThematicScreenerAcceptedResponse(BaseModel):
+    request_id: str
+    status: WorkflowStatus
+
+
+class ThematicScreenerStatusResponse(BaseModel):
+    request_id: str
+    last_updated: datetime
+    status: WorkflowStatus
+    logs: list[str] = Field(default_factory=list)
+    report: ThematicScreenerResponse | None = None

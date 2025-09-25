@@ -63,7 +63,9 @@ There is a simple UI available @ `http://localhost:8000/` where you can set your
 
 ### Programmatically
 
-You can generate a report for a universe of companies by sending a POST request to the `/thematic-screener` endpoint with the required parameters. For example, using `curl`:
+You can generate a report for a universe of companies by sending a POST request to the `/thematic-screener` endpoint with the required parameters. The service now works asynchronously - you'll receive a `request_id` immediately, and the analysis will run in the background.
+
+#### Step 1: Start the analysis
 ```bash
 curl -X 'POST' \
   'http://localhost:8000/thematic-screener' \
@@ -80,6 +82,27 @@ curl -X 'POST' \
     "frequency": "M"
   }'
 ```
+
+This will return a response like:
+```json
+{
+  "request_id": "12345678-1234-1234-1234-123456789abc",
+  "status": "queued"
+}
+```
+
+#### Step 2: Check status and retrieve results
+Use the `request_id` from the previous step to check the status and retrieve the results:
+```bash
+curl -X 'GET' \
+  'http://localhost:8000/status/12345678-1234-1234-1234-123456789abc' \
+  -H 'accept: application/json'
+```
+
+The response will include:
+- `status`: One of "queued", "in_progress", "completed", or "failed"
+- `logs`: Progress messages from the analysis
+- `report`: The complete thematic screening results (only when status is "completed")
 
 For more details on the parameters, refer to the API documentation @ `http://localhost:8000/docs`.
 
@@ -98,6 +121,7 @@ docker run -d \
 
 Then all API requests must include a `token` query parameter with the correct value to be authorized. For example:
 
+#### Step 1: Start the analysis with token authentication
 ```bash
 curl -X 'POST' \
   'http://localhost:8000/thematic-screener?token=<access-token-here>' \
@@ -113,6 +137,13 @@ curl -X 'POST' \
     "document_type": "TRANSCRIPTS",
     "frequency": "M"
   }'
+```
+
+#### Step 2: Check status with token authentication
+```bash
+curl -X 'GET' \
+  'http://localhost:8000/status/12345678-1234-1234-1234-123456789abc?token=<access-token-here>' \
+  -H 'accept: application/json'
 ```
 
 # Install and for development locally
