@@ -11,6 +11,7 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_thematic_screener import LOG_LEVEL, __version__, logger
 from bigdata_thematic_screener.api.models import (
+    ExampleWatchlists,
     ThematicScreenerAcceptedResponse,
     ThematicScreenerStatusResponse,
     ThematicScreenRequest,
@@ -88,7 +89,9 @@ async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     example_values = get_example_values_from_schema(ThematicScreenRequest)
 
     return HTMLResponse(
-        content=loader.get_template("api/index.html.jinja").render(**example_values),
+        content=loader.get_template("api/index.html.jinja").render(
+            example_watchlists=list(dict(ExampleWatchlists).values()), **example_values
+        ),
         media_type="text/html",
     )
 
