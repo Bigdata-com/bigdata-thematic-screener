@@ -1,6 +1,6 @@
 [project]
 name = "bigdata_thematic_screener"
-version = "2.0.0"
+version = "2.1.0"
 description = "Discover corporate exposure to any theme or event, grounded on thousands of sources provided by Bigdata.com"
 authors = [{name = "jaldana", email = "jaldana@ravenpack.com"}]
 readme = "README.md"
