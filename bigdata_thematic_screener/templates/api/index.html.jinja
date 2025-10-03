@@ -2,9 +2,9 @@
 {% block content %}
 
 <div id="infoModalsContainer"></div>
-<div class="flex flex-row w-full min-h-[500px]">
+<div class="flex flex-row w-full min-h-[500px] shadow-2xl rounded-lg overflow-hidden border border-zinc-800">
   <!-- Left: Form -->
-  <div id="sidebar" class="min-w-[150px] max-w-[600px] w-[300px] pr-6 bg-zinc-800 pl-2 rounded-l-lg pt-2 pb-2  transition-all duration-100 ease-in-out">
+  <div id="sidebar" class="min-w-[150px] max-w-[600px] w-[300px] pr-6 bg-gradient-to-b from-zinc-800 to-zinc-900 pl-2 pt-2 pb-2 transition-all duration-100 ease-in-out">
     <div class="overflow-y-auto">
     <form id="screenerForm" autocomplete="off" class="sticky top-0 z-10">
       <div class="mb-5">
@@ -14,7 +14,7 @@
             title="Info about Theme">ⓘ</button>
         </label>
         <input type="text" id="theme"
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           placeholder="{{ theme }}" required value="{{ theme }}" />
       </div>
 
@@ -24,7 +24,7 @@
           <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('focus')"
             title="Info about Focus">ⓘ</button>
         </label>
-        <textarea id="focus" class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
+        <textarea id="focus" class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all min-h-[80px]"
           placeholder="{{ focus }}"
           required>{{ focus }}</textarea>
       </div>
@@ -37,9 +37,9 @@
         </label>
         <div class="relative"> <!-- dropdown -->
           <input id="companies_text" type="text"
-            class="absolute w-[calc(100%-20px)] bg-gray-50 text-gray-900 text-md rounded-lg block p-2.5 h-[42px]" />
+            class="absolute w-[calc(100%-20px)] bg-gray-50 text-gray-900 text-md rounded-lg block p-2.5 h-[42px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
           <select id="companies"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 h-[42px] z-10"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 h-[42px] z-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all"
             onchange="this.previousElementSibling.value=this.options[this.selectedIndex].text;">
             <!-- Options are added in a javascript-->
           </select>
@@ -60,7 +60,7 @@
               title="Info about Start Date">ⓘ</button>
           </label>
           <input type="date" id="start_date"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             placeholder="{{ start_date }}" required value="{{ start_date }}" />
         </div>
 
@@ -71,7 +71,7 @@
               title="Info about End Date">ⓘ</button>
           </label>
           <input type="date" id="end_date"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             placeholder="{{ end_date }}" required value="{{ end_date }}" />
         </div>
 
@@ -81,7 +81,7 @@
             <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('frequency')"
               title="Info about Frequency">ⓘ</button>
           </label>
-          <select id="frequency" class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5">
+          <select id="frequency" class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all">
             <option value="D" {% if frequency == 'D' %}selected{% endif %}>Daily</option>
             <option value="W" {% if frequency == 'W' %}selected{% endif %}>Weekly</option>
             <option value="M" {% if frequency == 'M' %}selected{% endif %}>Monthly</option>
@@ -97,7 +97,7 @@
               title="Info about Fiscal Year">ⓘ</button>
           </label>
           <input type="text" id="fiscal_year"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             placeholder="e.g. 2025" value="{{ fiscal_year if fiscal_year else "" }}" />
         </div>
 
@@ -108,7 +108,7 @@
               title="Info about LLM Model">ⓘ</button>
           </label>
           <input type="text" id="llm_model"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             placeholder="{{ llm_model }}" value="{{ llm_model }}" />
         </div>
 
@@ -119,7 +119,7 @@
               title="Info about Document Type">ⓘ</button>
           </label>
           <select id="document_type"
-            class="hidden bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5">
+            class="hidden bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all">
             <option value="all" {% if document_type=='all' %}selected{% endif %}>ALL</option>
             <option value="filings" {% if document_type=='filings' %}selected{% endif %}>FILINGS</option>
             <option value="transcripts" {% if document_type=='transcripts' %}selected{% endif %}>TRANSCRIPTS</option>
@@ -135,7 +135,7 @@
               title="Info about Rerank Threshold">ⓘ</button>
           </label>
           <input type="number" id="rerank_threshold"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             placeholder="{{ rerank_threshold if rerank_threshold is defined and rerank_threshold is not none else '' }}"
             value="{{ rerank_threshold if rerank_threshold is defined and rerank_threshold is not none else '' }}"
             max="1" min="0" step="0.01">
@@ -148,7 +148,7 @@
               title="Info about Document Limit">ⓘ</button>
           </label>
           <input type="number" id="document_limit"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             placeholder="{{ document_limit }}" value="{{ document_limit }}" />
         </div>
 
@@ -159,7 +159,7 @@
               title="Info about Batch Size">ⓘ</button>
           </label>
           <input type="number" id="batch_size"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             placeholder="{{ batch_size }}" value="{{ batch_size }}" />
         </div>
 
@@ -172,9 +172,9 @@
     <div id="spinner" class="hidden p-2.5">⏳ Running...</div>
   </div>
   <!-- Drag bar -->
-  <div id="dragbar" class="w-2 cursor-ew-resize bg-zinc-700 hover:bg-blue-500 transition-colors duration-100 ease-in-out z-20" style="position: relative;"></div>
+  <div id="dragbar" class="w-1 cursor-ew-resize bg-zinc-700 hover:bg-blue-500 transition-all duration-200 ease-in-out z-20 hover:w-2" style="position: relative;"></div>
   <!-- Right: Output -->
-  <div id="outputarea" class="flex-1 min-w-[300px] bg-zinc-900 p-8 rounded-r-lg transition-all duration-100 ease-in-out">
+  <div id="outputarea" class="flex-1 min-w-[300px] bg-zinc-900 p-8 transition-all duration-100 ease-in-out">
     <button id="showJsonBtn"
       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center mb-4"
       style="display:none;">Show raw JSON</button>
@@ -212,22 +212,27 @@
   </div>
 </div>
 <!-- Logs below both -->
-<div class="my-8 bg-zinc-900 rounded-lg shadow-lg p-6 text-zinc-100" style="width: 100%;">
-  <h2 class="text-lg font-bold mb-4 text-sky-400">Process Logs</h2>
+<div class="my-8 bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-lg shadow-2xl p-6 text-zinc-100 border border-zinc-700" style="width: 100%;">
+  <h2 class="text-lg font-bold mb-4 text-sky-400 flex items-center gap-2">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+    </svg>
+    Process Logs
+  </h2>
   <div id="logViewer"
-    class="bg-zinc-800 border border-slate-700 rounded-md p-4 h-64 overflow-y-auto font-mono text-sm whitespace-pre-wrap break-words text-zinc-100">
+    class="bg-black/30 border border-slate-600 rounded-lg p-4 h-64 overflow-y-auto font-mono text-sm whitespace-pre-wrap break-words text-zinc-100 shadow-inner">
   </div>
 </div>
 
 <!-- Modal for JSON output -->
-<div id="jsonModal" class="hidden fixed z-[1000] inset-0 w-screen h-screen bg-black/50">
-  <div class="bg-white relative my-20 mx-auto p-5 rounded-lg w-4/5 max-w-[900px]">
+<div id="jsonModal" class="hidden fixed z-[1000] inset-0 w-screen h-screen bg-black/70 backdrop-blur-sm">
+  <div class="bg-white relative my-20 mx-auto p-6 rounded-xl w-4/5 max-w-[900px] shadow-2xl border border-gray-200">
     <button id="copyBtn" onclick="copyJson()"
-      class="absolute top-[10px] right-[50px] text-[15px] px-[10px] py-[4px] cursor-pointer text-gray-900">Copy</button>
-    <button onclick="closeModal()" class="absolute top-2.5 right-2.5 text-lg text-gray-900">&times;</button>
-    <h2 class="text-gray-900">Raw JSON Output</h2>
+      class="absolute top-4 right-14 text-sm px-4 py-2 cursor-pointer text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-medium">Copy</button>
+    <button onclick="closeModal()" class="absolute top-4 right-4 text-2xl text-gray-600 hover:text-gray-900 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">&times;</button>
+    <h2 class="text-gray-900 text-xl font-bold mb-4">Raw JSON Output</h2>
     <pre id="jsonContent"
-      class="bg-gray-900 text-gray-100 p-4 whitespace-pre-wrap break-words overflow-auto rounded-md mt-5"
+      class="bg-gray-900 text-gray-100 p-4 whitespace-pre-wrap break-words overflow-auto rounded-lg mt-2 border border-gray-700"
       style="max-height:60vh;"></pre>
   </div>
 </div>
@@ -388,11 +393,11 @@ document.addEventListener('DOMContentLoaded', function() {
   function showInfoModal(label) {
     let container = document.getElementById('infoModalsContainer');
     container.innerHTML = `
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onclick="if(event.target==this)this.style.display='none'">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
-          <button class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="this.closest('.fixed').style.display='none'">&times;</button>
-          <div class="text-base text-black">${infoContents[label] || 'No info available.'}</div>
-          <div class="mt-4 text-sm text-black">For a complete list of parameters and their descriptions, refer to the <a href='http://localhost:8000/docs' target='_blank' class='text-blue-600 underline'>API documentation</a>.</div>
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onclick="if(event.target==this)this.style.display='none'">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative border border-gray-200 animate-in">
+          <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-900 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors" onclick="this.closest('.fixed').style.display='none'">&times;</button>
+          <div class="text-base text-gray-800 leading-relaxed pr-8">${infoContents[label] || 'No info available.'}</div>
+          <div class="mt-4 text-sm text-gray-600 border-t border-gray-200 pt-4">For a complete list of parameters and their descriptions, refer to the <a href='http://localhost:8000/docs' target='_blank' class='text-blue-600 hover:text-blue-800 underline font-medium'>API documentation</a>.</div>
         </div>
       </div>
     `;
@@ -401,11 +406,11 @@ document.addEventListener('DOMContentLoaded', function() {
   function showDocumentModal(document_id) {
     let container = document.getElementById('infoModalsContainer');
     container.innerHTML = `
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onclick="if(event.target==this)this.style.display='none'">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
-          <button class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="this.closest('.fixed').style.display='none'">&times;</button>
-          <div class="text-base font-bold text-black">DOCUMENT ID</div>
-          <div class="text-base text-black">${document_id}</div>
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onclick="if(event.target==this)this.style.display='none'">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative border border-gray-200">
+          <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-900 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors" onclick="this.closest('.fixed').style.display='none'">&times;</button>
+          <div class="text-lg font-bold text-gray-900 mb-3">DOCUMENT ID</div>
+          <div class="text-base text-gray-700 font-mono bg-gray-100 p-3 rounded-lg border border-gray-300">${document_id}</div>
         </div>
       </div>
     `;
@@ -616,11 +621,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Render theme_scoring (dict of ticker -> CompanyScoring)
     if (data.theme_scoring && data.theme_scoring) {
-      html += '<h3 class="text-2xl font-bold text-white mb-2">Theme Scoring</h3>';
-      html += '<div class="max-h-[500px] overflow-y-auto">'
-      html += '<table class="table-auto">';
-      html += '<tr>';
-      // Dynamically create theme columns
+      html += '<h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>Theme Scoring</h3>';
+      html += '<div class="max-h-[500px] overflow-y-auto border border-zinc-700 rounded-lg shadow-lg p-4">'
+      html += '<div class="flex flex-col gap-6 w-full">';
+      
+      // Dynamically get all themes
       let allThemes = new Set();
       for (const scoring of Object.values(data.theme_scoring)) {
         if (scoring.themes) {
@@ -628,74 +633,110 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
       const themeList = Array.from(allThemes);
-      html += '<th class="sticky top-0 z-10 bg-zinc-900">Ticker</th><th class="sticky top-0 z-10 bg-zinc-900">Industry</th><th class="sticky top-0 z-10 bg-zinc-900">Composite Score</th><th class="sticky top-0 z-10 bg-zinc-900">Motivation</th>';
-      themeList.forEach(theme => {
-        html += `<th class="sticky top-0 z-10 bg-zinc-900">${escapeHtml(theme)}</th>`;
-      });
-      html += '</tr>';
-      for (const [ticker, scoring] of Object.entries(data.theme_scoring)) {
-        html += '<tr class="divide-y divide-white">';
-        html += `<td>${escapeHtml(scoring.ticker)}</td>`;
-        html += `<td>${escapeHtml(scoring.industry)}</td>`;
-        html += `<td>${escapeHtml(scoring.composite_score)}</td>`;
-        html += `<td>${escapeHtml(scoring.motivation)}</td>`;
-        // Explode themes into columns
+      
+        // Render each company as a card
+        for (const [company_name, scoring] of Object.entries(data.theme_scoring)) {
+          html += '<div class="bg-gradient-to-br from-gray-50 to-gray-200 rounded-xl p-3 border-l-4 border-blue-500 transition-all duration-300 hover:shadow-2xl">';
+          
+          // Header with company info on left and composite score on right
+          html += '<div class="flex justify-between items-start mb-2">';
+          
+          // Left side: Company header and industry
+          html += '<div class="flex flex-col">';
+          html += '<div class="flex items-center mb-2">';
+          html += `<div class="bg-blue-500 text-white px-3 py-1 rounded-full font-bold text-sm mr-2">${escapeHtml(scoring.ticker)}</div>`;
+          html += `<div class="text-xl font-bold text-gray-800">${escapeHtml(company_name)}</div>`;
+          html += '</div>';
+          html += '<div class="text-gray-600">';
+          html += `<strong>Industry:</strong> ${escapeHtml(scoring.industry)}`;
+          html += '</div>';
+          html += '</div>';
+          
+          // Right side: Composite score
+          html += '<div class="flex flex-col items-center justify-center">';
+          html += `<div class="text-3xl text-blue-500 font-bold">${escapeHtml(scoring.composite_score)}</div>`;
+          html += '<div class="text-gray-600 text-sm whitespace-nowrap">Composite Score</div>';
+          html += '</div>';
+          
+          html += '</div>'; // Close header flex container
+        
+        // Themes grid - only show themes with score != 0
+        html += '<div class="grid grid-cols-2 gap-2 mt-4">';
         themeList.forEach(theme => {
-          if (scoring.themes && theme in scoring.themes) {
-            html += `<td>${escapeHtml(scoring.themes[theme])}</td>`;
-          } else {
-            html += '<td></td>';
+          const score = (scoring.themes && theme in scoring.themes) ? scoring.themes[theme] : 0;
+          if (score !== 0) {
+            html += '<div class="flex justify-between items-center bg-white p-2 px-3 rounded-md text-sm">';
+            html += `<span class="text-gray-800">${escapeHtml(theme)}</span>`;
+            html += `<div class="bg-green-600 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">${escapeHtml(score)}</div>`;
+            html += '</div>';
           }
         });
-        html += '</tr>';
+        html += '</div>';
+        
+        // Motivation
+        html += '<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4 text-yellow-800 leading-relaxed cursor-pointer relative group" onclick="toggleMotivation(this)">';
+        html += '<div class="motivation-text max-h-[2em] overflow-hidden">';
+        html += `<strong>Key Innovations:</strong> ${escapeHtml(scoring.motivation)}`;
+        html += '</div>';
+        html += '<div class="text-blue-600 text-sm font-semibold mt-2 group-hover:text-blue-800">Click to expand</div>';
+        html += '</div>';
+        
+        html += '</div>'; // Close card
       }
-      html += '</table>';
-      html += '</div>'
+      html += '</div>'; // Close grid
+      html += '</div>'; // Close container
     }
 
     // Render theme_taxonomy (tree)
     function renderTaxonomy(node, depth = 0) {
       if (!node) return '';
       let pad = '&nbsp;'.repeat(depth * 4);
-      let html = `${pad}<b>${escapeHtml(node.label)}</b> (Node: ${escapeHtml(node.node)})`;
-      if (node.summary) html += ` - ${escapeHtml(node.summary)}`;
+      let html = `${pad}<b class="text-blue-400">${escapeHtml(node.label)}</b> <span class="text-zinc-500">(Node: ${escapeHtml(node.node)})</span>`;
+      if (node.summary) html += ` <span class="text-zinc-300">- ${escapeHtml(node.summary)}</span>`;
       if (node.children && node.children.length) {
-        html += '<ul>';
+        html += '<ul class="ml-4 my-2 border-l-2 border-zinc-700 pl-4">';
         for (const child of node.children) {
-          html += '<li>' + renderTaxonomy(child, depth + 1) + '</li>';
+          html += '<li class="my-1">' + renderTaxonomy(child, depth + 1) + '</li>';
         }
         html += '</ul>';
       }
       return html;
     }
     if (data.theme_taxonomy) {
-      html += '<h3 class="text-2xl font-bold text-white mb-2">Theme Taxonomy</h3>';
-      html += '<div class="table-main p-4">' + renderTaxonomy(data.theme_taxonomy) + '</div>';
+      html += '<h3 class="text-2xl font-bold text-white mb-4 mt-8 flex items-center gap-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>Theme Taxonomy</h3>';
+      html += '<div class="bg-zinc-800/50 border border-zinc-700 rounded-lg p-6 shadow-lg">' + renderTaxonomy(data.theme_taxonomy) + '</div>';
     }
 
     // Render content (list of LabeledChunk)
     if (data.content && Array.isArray(data.content) && data.content.length) {
-      html += '<h3 class="text-2xl font-bold text-white mb-2">Labeled Content</h3>';
-      html += '<div class="max-h-[500px] overflow-y-auto">'
-      html += '<table class="table-auto">';
+      html += '<h3 class="text-2xl font-bold text-white mb-4 mt-8 flex items-center gap-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>Labeled Content</h3>';
+      html += '<div class="max-h-[500px] overflow-y-auto border border-zinc-700 rounded-lg shadow-lg">'
+      html += '<table class="table-auto w-full border-collapse">';
+      html += '<thead class="bg-gradient-to-r from-zinc-800 to-zinc-700">';
       html += '<tr>';
-      html += '<th class="sticky top-0 z-10 bg-zinc-900">Time Period</th><th class="sticky top-0 z-10 bg-zinc-900">Date</th><th class="sticky top-0 z-10 bg-zinc-900">Company</th><th class="sticky top-0 z-10 bg-zinc-900">Sector</th><th class="sticky top-0 z-10 bg-zinc-900">Industry</th><th class="sticky top-0 z-10 bg-zinc-900">Country</th><th class="sticky top-0 z-10 bg-zinc-900">Ticker</th><th class="sticky top-0 z-10 bg-zinc-900"><span>Headline</span><span><button type="button" class="text-blue-500 text-sm" onclick=showInfoModal(\'headline_comment\') title="Info">ⓘ</button></span></th><th class="sticky top-0 z-10 bg-zinc-900">Quote</th><th class="sticky top-0 z-10 bg-zinc-900">Motivation</th><th class="sticky top-0 z-10 bg-zinc-900">Theme</th>';
+      html += '<th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Time Period</th><th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Date</th><th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Company</th><th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Sector</th><th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Industry</th><th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Country</th><th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Ticker</th><th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600"><span>Headline</span><span><button type="button" class="text-blue-400 text-sm ml-1 hover:text-blue-300" onclick=showInfoModal(\'headline_comment\') title="Info">ⓘ</button></span></th><th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Quote</th><th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Motivation</th><th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Theme</th>';
       html += '</tr>';
+      html += '</thead>';
+      html += '<tbody class="divide-y divide-zinc-700 bg-zinc-900">';
+      let rowIdx = 0;
       for (const chunk of data.content) {
-        html += '<tr class="divide-y divide-white">';
-        html += `<td>${escapeHtml(chunk.time_period)}</td>`;
-        html += `<td>${escapeHtml(chunk.date)}</td>`;
-        html += `<td>${escapeHtml(chunk.company)}</td>`;
-        html += `<td>${escapeHtml(chunk.sector)}</td>`;
-        html += `<td>${escapeHtml(chunk.industry)}</td>`;
-        html += `<td>${escapeHtml(chunk.country)}</td>`;
-        html += `<td>${escapeHtml(chunk.ticker)}</td>`;
-        html += `<td onclick="showDocumentModal('${chunk.document_id}')">${escapeHtml(chunk.headline)}</td>`;
-        html += `<td>${escapeHtml(chunk.quote)}</td>`;
-        html += `<td>${escapeHtml(chunk.motivation)}</td>`;
-        html += `<td>${escapeHtml(chunk.theme)}</td>`;
+        const bgClass = rowIdx % 2 === 0 ? 'bg-zinc-900' : 'bg-zinc-800/50';
+        html += `<tr class="${bgClass} hover:bg-zinc-700/50 transition-colors duration-150">`;
+        html += `<td class="px-4 py-3 text-sm text-zinc-300">${escapeHtml(chunk.time_period)}</td>`;
+        html += `<td class="px-4 py-3 text-sm text-zinc-300">${escapeHtml(chunk.date)}</td>`;
+        html += `<td class="px-4 py-3 text-sm font-medium text-zinc-200">${escapeHtml(chunk.company)}</td>`;
+        html += `<td class="px-4 py-3 text-sm text-zinc-300">${escapeHtml(chunk.sector)}</td>`;
+        html += `<td class="px-4 py-3 text-sm text-zinc-300">${escapeHtml(chunk.industry)}</td>`;
+        html += `<td class="px-4 py-3 text-sm text-zinc-300">${escapeHtml(chunk.country)}</td>`;
+        html += `<td class="px-4 py-3 text-sm font-medium text-blue-400">${escapeHtml(chunk.ticker)}</td>`;
+        html += `<td class="px-4 py-3 text-sm text-blue-400 cursor-pointer hover:text-blue-300 hover:underline" onclick="showDocumentModal('${chunk.document_id}')">${escapeHtml(chunk.headline)}</td>`;
+        html += `<td class="px-4 py-3 text-sm text-zinc-300 italic">${escapeHtml(chunk.quote)}</td>`;
+        html += `<td class="px-4 py-3 text-sm text-zinc-300">${escapeHtml(chunk.motivation)}</td>`;
+        html += `<td class="px-4 py-3 text-sm font-medium text-green-400">${escapeHtml(chunk.theme)}</td>`;
         html += '</tr>';
+        rowIdx++;
       }
+      html += '</tbody>';
       html += '</table>';
       html += '</div>'
     }
@@ -706,6 +747,22 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('jsonModal').style.display = 'none';
   }
   window.closeModal = closeModal;
+  
+  function toggleMotivation(element) {
+    const textDiv = element.querySelector('.motivation-text');
+    const clickText = element.querySelector('.text-blue-600');
+    
+    if (textDiv.classList.contains('max-h-[2em]')) {
+      textDiv.classList.remove('max-h-[2em]', 'overflow-hidden');
+      textDiv.classList.add('max-h-full');
+      clickText.textContent = 'Click to collapse...';
+    } else {
+      textDiv.classList.remove('max-h-full');
+      textDiv.classList.add('max-h-[2em]', 'overflow-hidden');
+      clickText.textContent = 'Click to expand...';
+    }
+  }
+  window.toggleMotivation = toggleMotivation;
   function copyJson() {
     const jsonContent = document.getElementById('jsonContent');
     if (!jsonContent) return;
