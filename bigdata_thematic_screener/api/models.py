@@ -16,13 +16,11 @@ def yesterday() -> date:
     return date.today() - timedelta(days=1)
 
 
-def select_fiscal_year() -> int:
+def select_fiscal_year() -> list[int]:
     today = date.today()
-    # Avoid searching current fiscal year if its too early in the year
-    if today.month >= 6:
-        return today.year
-    else:
-        return today.year - 1
+    # Create a fiscal year window from last year to next year
+    fiscal_window = [today.year - 1, today.year, today.year+1]
+    return fiscal_window
 
 
 class FrequencyEnum(StrEnum):
@@ -111,7 +109,7 @@ class ThematicScreenRequest(BaseModel):
         example="openai::gpt-4o-mini",
         description="LLM model identifier used for taxonomy creation and semantic analysis.",
     )
-    fiscal_year: int | None = Field(
+    fiscal_year: int | list[int] | None = Field(
         description="If the document type is transcripts or filings, fiscal year needs to be specified.",
         example=select_fiscal_year(),
     )

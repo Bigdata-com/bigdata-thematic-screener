@@ -88,7 +88,7 @@
             <option value="3M" {% if frequency == '3M' %}selected{% endif %}>Quarterly</option>
             <option value="Y" {% if frequency == 'Y' %}selected{% endif %}>Yearly</option>
           </select>
-        </div>
+        </div>git 
 
         <div class="mb-5">
           <label for="fiscal_year" class="block mb-2 font-bold text-md text-white">
@@ -98,7 +98,7 @@
           </label>
           <input type="text" id="fiscal_year"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            placeholder="e.g. 2025" value="{{ fiscal_year if fiscal_year else "" }}" />
+            placeholder="e.g. 2025" value="{% if fiscal_year %}{% if fiscal_year is iterable and fiscal_year is not string %}{{ fiscal_year|join(', ') }}{% else %}{{ fiscal_year }}{% endif %}{% endif %}" />
         </div>
 
         <div class="mb-5">
