@@ -46,25 +46,30 @@ class WatchlistExample(BaseModel):
 
 
 class ExampleWatchlists(Enum):
-    POINT_72 = WatchlistExample(
-        id="9ab396cf-a2bb-4c91-b9bf-ed737905803e", name="Point 72 Holdings"
+    TOP_100_UK = WatchlistExample(
+        id="33d6f577-9256-4a53-944f-09127e42fdc2", name="Top 100 UK"
     )
-    MILITARIZATION = WatchlistExample(
-        id="beda15f2-b3ba-44dd-80c6-79d8a1bba764", name="Militarization"
+    TOP_50_EU = WatchlistExample(
+        id="9baef470-8cf5-46fa-b30a-352bcb35cd94", name="Top 50 Europe"
     )
     US_LARGE_CAP_100 = WatchlistExample(
-        id="44118802-9104-4265-b97a-2e6d88d74893", name="US Large Cap 100"
+        id="44118802-9104-4265-b97a-2e6d88d74893", name="Top 100 US"
     )
-    HIGH_FINANCE = WatchlistExample(
-        id="f7801965-ed54-4ff1-b524-b4ecee3bc858", name="High Finance"
+    TOP_40_DE = WatchlistExample(
+        id="8453c26f-47c5-4e78-b5c8-acf245caccad", name="Top 40 Germany"
     )
-    THIRD_POINT_HOLDINGS = WatchlistExample(
-        id="ec300f6f-64f0-4897-9f63-82e8d60a7e5a", name="Third Point Holdings"
+    TOP_40_FR = WatchlistExample(
+        id="9fb6ac2d-a552-4dbb-b62f-8657ef18bf29", name="Top 40 France"
     )
-    THE_STREET_INDEX = WatchlistExample(
-        id="ccfe5dc2-0c92-42d7-861c-1d8ee74a9e02", name="The Street Index"
+    DOW_30 = WatchlistExample(
+        id="5b78837c-343d-4559-8f06-98668b09d1df", name="Dow 30"
     )
-    AI_SZN = WatchlistExample(id="db8478c9-34db-4975-8e44-b1ff764098ac", name="AI Szn")
+    NASDAQ_100 = WatchlistExample(
+        id="402acbcd-f1d8-4a55-997a-598819be0bbf", name="Nasdaq 100"
+    )
+    MAG_7 = WatchlistExample(
+        id="814d0944-a2c1-44f6-8b42-a70c0795428e", name="Magnificent 7"
+    )
 
     def __iter__(self):
         """Allows to create a dict from the enum
