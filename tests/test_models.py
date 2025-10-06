@@ -149,6 +149,34 @@ def test_thematic_screen_request_model_invalid(
             200,
             20,
         ),
+        # Only one fiscal year but as a list
+        (
+            "Supply Chain Reshaping",
+            ["A12345"],
+            "2025-01-01",
+            "2025-12-31",
+            "openai::gpt-4o-mini",
+            [2025],
+            DocumentType.TRANSCRIPTS,
+            None,
+            FrequencyEnum.yearly,
+            200,
+            20,
+        ),
+        # Multiple fiscal years
+        (
+            "Supply Chain Reshaping",
+            ["A12345"],
+            "2025-01-01",
+            "2025-12-31",
+            "openai::gpt-4o-mini",
+            [2025, 2026, 2027],
+            DocumentType.TRANSCRIPTS,
+            None,
+            FrequencyEnum.yearly,
+            200,
+            20,
+        ),
         # Control entities with multiple places
         (
             "Supply Chain Reshaping",
