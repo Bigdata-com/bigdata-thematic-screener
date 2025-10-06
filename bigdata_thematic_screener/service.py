@@ -6,7 +6,7 @@ from uuid import UUID
 import pandas as pd
 from bigdata_client import Bigdata
 from bigdata_client.models.entities import Company
-from bigdata_research_tools.themes import ThemeTree
+from bigdata_research_tools.tree import SemanticTree
 from bigdata_research_tools.utils.observer import OberserverNotification, Observer
 from bigdata_research_tools.workflows.thematic_screener import ThematicScreener
 
@@ -72,7 +72,7 @@ def build_response(
     df_company: pd.DataFrame,
     df_motivation: pd.DataFrame,
     df_labeled: pd.DataFrame,
-    theme_tree: ThemeTree,
+    theme_tree: SemanticTree,
 ) -> ThematicScreenerResponse:
     """
     Build the response for the output of the thematic screener workflow.
