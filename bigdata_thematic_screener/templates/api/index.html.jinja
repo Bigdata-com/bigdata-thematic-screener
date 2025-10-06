@@ -119,7 +119,7 @@
               title="Info about Document Type">ⓘ</button>
           </label>
           <select id="document_type"
-            class="hidden bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all">
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all">
             <option value="all" {% if document_type=='all' %}selected{% endif %}>ALL</option>
             <option value="filings" {% if document_type=='filings' %}selected{% endif %}>FILINGS</option>
             <option value="transcripts" {% if document_type=='transcripts' %}selected{% endif %}>TRANSCRIPTS</option>
@@ -492,9 +492,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const start_date = document.getElementById('start_date').value;
     const end_date = document.getElementById('end_date').value;
     let fiscal_year = document.getElementById('fiscal_year').value.trim();
-    if (!fiscal_year || isNaN(Number(fiscal_year))) {
-      fiscal_year = null;
+    if (fiscal_year.includes(',')) {
+      fiscal_year = fiscal_year.split(',').map(s => s.trim()).filter(Boolean);
+      // Check if all entries are numbers
+      if (!fiscal_year.every(yr => isNaN(Number(yr)))) {
+        output.innerHTML = `<span class="error">❌ Error: Fiscal Year entries must be valid years (YYYY).</span>`;
+      }
+    } else if (fiscal_year) {
+      fiscal_year = fiscal_year;
+    } else {
+      fiscal_year = undefined;
     }
+
     const llm_model = document.getElementById('llm_model').value.trim();
     const document_type = document.getElementById('document_type').value;
     const rerank_threshold = document.getElementById('rerank_threshold').value;
