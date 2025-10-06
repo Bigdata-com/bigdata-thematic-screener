@@ -88,9 +88,9 @@
             <option value="3M" {% if frequency == '3M' %}selected{% endif %}>Quarterly</option>
             <option value="Y" {% if frequency == 'Y' %}selected{% endif %}>Yearly</option>
           </select>
-        </div>git 
+        </div> 
 
-        <div class="mb-5">
+        <div class="hidden mb-5">
           <label for="fiscal_year" class="block mb-2 font-bold text-md text-white">
             <span>Fiscal Year:</span>
             <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('fiscal_year')"
@@ -101,7 +101,7 @@
             placeholder="e.g. 2025" value="{% if fiscal_year %}{% if fiscal_year is iterable and fiscal_year is not string %}{{ fiscal_year|join(', ') }}{% else %}{{ fiscal_year }}{% endif %}{% endif %}" />
         </div>
 
-        <div class="mb-5">
+        <div class="hidden mb-5">
           <label for="llm_model" class="block mb-2 font-bold text-md text-white">
             <span>LLM Model:</span>
             <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('llm_model')"
@@ -119,7 +119,7 @@
               title="Info about Document Type">ⓘ</button>
           </label>
           <select id="document_type"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all">
+            class="hidden bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all">
             <option value="all" {% if document_type=='all' %}selected{% endif %}>ALL</option>
             <option value="filings" {% if document_type=='filings' %}selected{% endif %}>FILINGS</option>
             <option value="transcripts" {% if document_type=='transcripts' %}selected{% endif %}>TRANSCRIPTS</option>
@@ -473,6 +473,7 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Waiting for response...';
 
+    try {
     // Gather form data
     const theme = document.getElementById('theme').value.trim();
     const focus = document.getElementById('focus').value.trim();
@@ -495,8 +496,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fiscal_year.includes(',')) {
       fiscal_year = fiscal_year.split(',').map(s => s.trim()).filter(Boolean);
       // Check if all entries are numbers
-      if (!fiscal_year.every(yr => isNaN(Number(yr)))) {
-        output.innerHTML = `<span class="error">❌ Error: Fiscal Year entries must be valid years (YYYY).</span>`;
+      if (!fiscal_year.every(yr => Number(yr))) {
+        throw new Error('Fiscal Year must be a number or a comma-separated list of numbers.');
       }
     } else if (fiscal_year) {
       fiscal_year = fiscal_year;
@@ -546,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function() {
       params.append("token", token);
     }
 
-    try {
+
       const response = await fetch(`/thematic-screener?${params}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
