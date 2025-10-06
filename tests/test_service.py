@@ -7,7 +7,7 @@ from bigdata_thematic_screener.models import (
     ThemeScoring,
     ThemeTaxonomy,
 )
-from bigdata_thematic_screener.service import ThemeTree, build_response
+from bigdata_thematic_screener.service import SemanticTree, build_response
 
 
 @pytest.fixture
@@ -89,13 +89,13 @@ def df_labeled():
 
 @pytest.fixture
 def theme_tree():
-    return ThemeTree(
+    return SemanticTree(
         label="Root",
         node=1,
         summary="Root node",
         children=[
-            ThemeTree(label="Theme1", node=2, summary="Theme1 for company"),
-            ThemeTree(
+            SemanticTree(label="Theme1", node=2, summary="Theme1 for company"),
+            SemanticTree(
                 label="Theme 2 with long name", node=3, summary="Theme 2 for company"
             ),
         ],

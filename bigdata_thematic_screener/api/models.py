@@ -19,7 +19,7 @@ def yesterday() -> date:
 def select_fiscal_year() -> list[int]:
     today = date.today()
     # Create a fiscal year window from last year to next year
-    fiscal_window = [today.year - 1, today.year, today.year+1]
+    fiscal_window = [today.year - 1, today.year, today.year + 1]
     return fiscal_window
 
 
@@ -59,9 +59,7 @@ class ExampleWatchlists(Enum):
     TOP_40_FR = WatchlistExample(
         id="9fb6ac2d-a552-4dbb-b62f-8657ef18bf29", name="Top 40 France"
     )
-    DOW_30 = WatchlistExample(
-        id="5b78837c-343d-4559-8f06-98668b09d1df", name="Dow 30"
-    )
+    DOW_30 = WatchlistExample(id="5b78837c-343d-4559-8f06-98668b09d1df", name="Dow 30")
     NASDAQ_100 = WatchlistExample(
         id="402acbcd-f1d8-4a55-997a-598819be0bbf", name="Nasdaq 100"
     )
