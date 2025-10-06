@@ -8,8 +8,8 @@ from pydantic import BaseModel, Field, model_validator
 from bigdata_thematic_screener.models import ThematicScreenerResponse
 
 
-def three_months_ago() -> date:
-    return date.today() - timedelta(days=90)
+def one_year_ago() -> date:
+    return date.today() - timedelta(days=365)
 
 
 def yesterday() -> date:
@@ -95,7 +95,7 @@ class ThematicScreenRequest(BaseModel):
     start_date: str = Field(
         ...,
         description="Start date of the analysis window (format: YYYY-MM-DD).",
-        example=three_months_ago().isoformat(),
+        example=one_year_ago().isoformat(),
     )
     end_date: str = Field(
         ...,
@@ -122,8 +122,8 @@ class ThematicScreenRequest(BaseModel):
         description="Optional threshold (0-1) to rerank and filter search results by relevance.",
     )
     frequency: FrequencyEnum = Field(
-        default=FrequencyEnum.quarterly,
-        example=FrequencyEnum.quarterly,
+        default=FrequencyEnum.yearly,
+        example=FrequencyEnum.yearly,
         description="Search frequency interval. Supported values: D (daily), W (weekly), M (monthly), 3M (quarterly), Y (yearly).",
     )
     document_limit: int = Field(
