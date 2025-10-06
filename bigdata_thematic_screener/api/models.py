@@ -8,8 +8,8 @@ from pydantic import BaseModel, Field, model_validator
 from bigdata_thematic_screener.models import ThematicScreenerResponse
 
 
-def six_months_ago() -> date:
-    return date.today() - timedelta(days=180)
+def three_months_ago() -> date:
+    return date.today() - timedelta(days=90)
 
 
 def yesterday() -> date:
@@ -95,7 +95,7 @@ class ThematicScreenRequest(BaseModel):
     start_date: str = Field(
         ...,
         description="Start date of the analysis window (format: YYYY-MM-DD).",
-        example=six_months_ago().isoformat(),
+        example=three_months_ago().isoformat(),
     )
     end_date: str = Field(
         ...,
