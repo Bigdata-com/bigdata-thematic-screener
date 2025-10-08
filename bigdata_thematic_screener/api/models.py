@@ -4,6 +4,7 @@ from typing import Literal, Optional
 
 from bigdata_client.models.search import DocumentType
 from pydantic import BaseModel, Field, model_validator
+from pydantic_core import ValidationError
 
 from bigdata_thematic_screener.models import ThematicScreenerResponse
 
@@ -145,27 +146,78 @@ class ThematicScreenRequest(BaseModel):
             if (
                 start_date > end_date
             ):  # We can compare directly as they are both ISO format strings
-                raise ValueError("start_date must be earlier than end_date")
+                raise ValidationError.from_exception_data(
+                    title=cls.__name__,
+                    line_errors=[
+                        {
+                            "type": "value_error",
+                            "loc": ("start_date", "end_date"),
+                            "ctx": {
+                                "error": "start_date must be earlier than end_date"
+                            },
+                        }
+                    ],
+                )
         except Exception as e:
-            raise ValueError(f"Invalid date format or range: {e}")
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("start_date", "end_date"),
+                        "ctx": {"error": f"Invalid date format or range: {e}"},
+                        "input": {
+                            "start_date": values["start_date"],
+                            "end_date": values["end_date"],
+                        },
+                    }
+                ],
+            )
         return values
 
     @model_validator(mode="before")
     def check_fiscal_year_when_transcript_or_filing(cls, values):
         doc_type = values.get("document_type", None)
         if doc_type is None:
-            raise ValueError("document_type must be specified.")
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("document_type",),
+                        "ctx": {"error": "document_type must be specified."},
+                    }
+                ],
+            )
         if doc_type.upper() not in DocumentType.__members__:
-            raise ValueError(
-                f"Invalid document_type: {doc_type}, possible values are: {list(DocumentType.__members__.keys())}"
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("document_type",),
+                        "ctx": {
+                            "error": f"Invalid document_type: {doc_type}, possible values are: {list(DocumentType.__members__.keys())}"
+                        },
+                    }
+                ],
             )
         doc_type = DocumentType[doc_type.upper()]
         if doc_type in [
             DocumentType.TRANSCRIPTS,
             DocumentType.FILINGS,
         ] and not values.get("fiscal_year"):
-            raise ValueError(
-                "fiscal_year must be specified when document_type is TRANSCRIPT or FILING."
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("fiscal_year",),
+                        "ctx": {
+                            "error": "fiscal_year must be specified when document_type is TRANSCRIPT or FILING."
+                        },
+                    }
+                ],
             )
         elif (
             doc_type
@@ -176,8 +228,17 @@ class ThematicScreenRequest(BaseModel):
             ]
             and values.get("fiscal_year") is not None
         ):
-            raise ValueError(
-                "fiscal_year must not be specified when document_type is not TRANSCRIPT or FILING."
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("fiscal_year",),
+                        "ctx": {
+                            "error": "fiscal_year must not be specified when document_type is not TRANSCRIPT or FILING."
+                        },
+                    }
+                ],
             )
         return values
 
@@ -193,10 +254,33 @@ class ThematicScreenRequest(BaseModel):
         if isinstance(freq, str):
             freq = FrequencyEnum(freq)
         if not isinstance(freq, FrequencyEnum):
-            raise ValueError(f"Invalid frequency: {freq}")
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("frequency",),
+                        "ctx": {"error": f"Invalid frequency: {freq}"},
+                        "input": {"frequency": freq},
+                    }
+                ],
+            )
         if delta_days < freq_min_days[freq.value]:
-            raise ValueError(
-                f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("start_date", "end_date"),
+                        "ctx": {
+                            "error": f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
+                        },
+                        "input": {
+                            "start_date": values["start_date"],
+                            "end_date": values["end_date"],
+                        },
+                    }
+                ],
             )
         return values
 
