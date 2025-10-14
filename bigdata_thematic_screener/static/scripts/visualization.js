@@ -53,14 +53,27 @@ function escapeHtml(text) {
 function toggleAdvancedOptions() {
     var adv = document.getElementById('advanced-options');
     var btnIcon = document.getElementById('advancedOptionsIcon');
-    if (adv.style.display === 'none' || adv.classList.contains('hidden')) {
-        adv.style.display = 'block';
+    if (adv.classList.contains('hidden')) {
         adv.classList.remove('hidden');
-        btnIcon.textContent = '-';
+        btnIcon.style.transform = 'rotate(180deg)';
     } else {
-        adv.style.display = 'none';
         adv.classList.add('hidden');
-        btnIcon.textContent = '+';
+        btnIcon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function toggleProcessLogs() {
+    const container = document.getElementById('logViewerContainer');
+    const icon = document.getElementById('logsIcon');
+    
+    if (container && icon) {
+        if (container.classList.contains('hidden')) {
+            container.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            container.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+        }
     }
 }
 
@@ -124,29 +137,4 @@ function copyJson() {
     }
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-    const dragbar = document.getElementById('dragbar');
-    const sidebar = document.getElementById('sidebar');
-    const outputarea = document.getElementById('outputarea');
-    let dragging = false;
-    dragbar.addEventListener('mousedown', function (e) {
-        dragging = true;
-        document.body.classList.add('cursor-ew-resize');
-        document.body.style.userSelect = 'none';
-    });
-    document.addEventListener('mousemove', function (e) {
-        if (!dragging) return;
-        const minSidebar = 250;
-        const maxSidebar = 600;
-        let newWidth = Math.min(Math.max(e.clientX - sidebar.getBoundingClientRect().left, minSidebar), maxSidebar);
-        sidebar.style.width = newWidth + 'px';
-        // outputarea will flex to fill remaining space
-    });
-    document.addEventListener('mouseup', function (e) {
-        if (dragging) {
-            dragging = false;
-            document.body.classList.remove('cursor-ew-resize');
-            document.body.style.userSelect = '';
-        }
-    });
-});
+// Drag-to-resize functionality removed (now using horizontal layout)

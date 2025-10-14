@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Functionality Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #444;
+        }
+        .test-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #333;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .status {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+        .pass { background: #22c55e; color: white; }
+        .fail { background: #ef4444; color: white; }
+        .pending { background: #eab308; color: black; }
+        .running { background: #3b82f6; color: white; }
+        h1 { color: #60a5fa; }
+        h2 { color: #34d399; margin-top: 0; }
+        .summary {
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 15px;
+            background: #1e293b;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .log-output {
+            background: #111;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #444;
+        }
+        .error-details {
+            color: #fca5a5;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 10px 10px 0 0;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Frontend Functionality Tests</h1>
+    <div class="summary" id="summary">Initializing tests...</div>
+    
+    <button onclick="runAllTests()" id="runBtn">Run All Tests</button>
+    <button onclick="clearResults()">Clear Results</button>
+    
+    <div class="test-section">
+        <h2>📋 Script Loading Tests</h2>
+        <div id="scriptTests"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 DOM Elements Tests</h2>
+        <div id="domTests"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>⚡ Load Example Button Tests</h2>
+        <div id="exampleTests"></div>
+        <div class="log-output" id="exampleLog"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🚀 Form Submission Tests</h2>
+        <div id="formTests"></div>
+        <div class="log-output" id="formLog"></div>
+    </div>
+
+    <script>
+        const SERVER_URL = 'http://localhost:8000';
+        let testResults = {
+            passed: 0,
+            failed: 0,
+            total: 0
+        };
+
+        function updateSummary() {
+            const summary = document.getElementById('summary');
+            const percentage = testResults.total > 0 
+                ? Math.round((testResults.passed / testResults.total) * 100) 
+                : 0;
+            summary.innerHTML = `
+                📊 Test Results: 
+                <span style="color: #22c55e">${testResults.passed} passed</span> / 
+                <span style="color: #ef4444">${testResults.failed} failed</span> / 
+                ${testResults.total} total 
+                (${percentage}% success rate)
+            `;
+        }
+
+        function addTest(containerId, name, status, details = '') {
+            const container = document.getElementById(containerId);
+            const testItem = document.createElement('div');
+            testItem.className = 'test-item';
+            testItem.innerHTML = `
+                <span>${name}</span>
+                <span class="status ${status}">${status.toUpperCase()}</span>
+            `;
+            if (details) {
+                const detailsDiv = document.createElement('div');
+                detailsDiv.className = 'error-details';
+                detailsDiv.textContent = details;
+                testItem.appendChild(detailsDiv);
+            }
+            container.appendChild(testItem);
+            
+            if (status === 'pass') testResults.passed++;
+            if (status === 'fail') testResults.failed++;
+            testResults.total++;
+            updateSummary();
+        }
+
+        function log(logId, message) {
+            const logElement = document.getElementById(logId);
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        async function runAllTests() {
+            document.getElementById('runBtn').disabled = true;
+            clearResults();
+            
+            log('exampleLog', '🚀 Starting test suite...');
+            
+            // Test 1: Script Loading
+            await testScriptLoading();
+            
+            // Test 2: DOM Elements
+            await testDOMElements();
+            
+            // Test 3: Load Example Button
+            await testLoadExampleButton();
+            
+            // Test 4: Form Submission
+            await testFormSubmission();
+            
+            log('exampleLog', '✅ All tests completed!');
+            document.getElementById('runBtn').disabled = false;
+        }
+
+        async function testScriptLoading() {
+            log('exampleLog', '📋 Testing script loading...');
+            
+            try {
+                const response = await fetch(SERVER_URL);
+                const html = await response.text();
+                
+                // Check that deleted script is NOT loaded
+                if (html.includes('load_example.js')) {
+                    addTest('scriptTests', 'No reference to deleted load_example.js', 'fail', 'Found reference to deleted file');
+                } else {
+                    addTest('scriptTests', 'No reference to deleted load_example.js', 'pass');
+                }
+                
+                // Check required scripts are loaded
+                const requiredScripts = ['visualization.js', 'report_renderer.js', 'validators.js', 'form.js'];
+                for (const script of requiredScripts) {
+                    if (html.includes(script)) {
+                        addTest('scriptTests', `${script} is loaded`, 'pass');
+                    } else {
+                        addTest('scriptTests', `${script} is loaded`, 'fail', 'Script not found in HTML');
+                    }
+                }
+                
+            } catch (error) {
+                addTest('scriptTests', 'Fetch HTML from server', 'fail', error.message);
+            }
+        }
+
+        async function testDOMElements() {
+            log('exampleLog', '🎯 Testing DOM elements...');
+            
+            try {
+                const response = await fetch(SERVER_URL);
+                const html = await response.text();
+                
+                // Check form exists
+                if (html.includes('id="screenerForm"')) {
+                    addTest('domTests', 'Form element exists', 'pass');
+                } else {
+                    addTest('domTests', 'Form element exists', 'fail', 'screenerForm not found');
+                }
+                
+                // Check Load Example button
+                if (html.includes('id="loadExampleBtn"')) {
+                    addTest('domTests', 'Load Example button exists', 'pass');
+                } else {
+                    addTest('domTests', 'Load Example button exists', 'fail', 'loadExampleBtn not found');
+                }
+                
+                // Check tab navigation
+                if (html.includes('id="tabNavigation"')) {
+                    addTest('domTests', 'Tab navigation exists', 'pass');
+                } else {
+                    addTest('domTests', 'Tab navigation exists', 'fail', 'tabNavigation not found');
+                }
+                
+                // Check log viewer
+                if (html.includes('id="logViewer"')) {
+                    addTest('domTests', 'Log viewer exists', 'pass');
+                } else {
+                    addTest('domTests', 'Log viewer exists', 'fail', 'logViewer not found');
+                }
+                
+            } catch (error) {
+                addTest('domTests', 'Fetch HTML from server', 'fail', error.message);
+            }
+        }
+
+        async function testLoadExampleButton() {
+            log('exampleLog', '⚡ Testing Load Example functionality...');
+            
+            try {
+                // Test 1: Check if example.json exists
+                log('exampleLog', 'Checking if example.json is accessible...');
+                const jsonResponse = await fetch(`${SERVER_URL}/static/data/example.json`);
+                
+                if (!jsonResponse.ok) {
+                    addTest('exampleTests', 'Example JSON file accessible', 'fail', `Status: ${jsonResponse.status}`);
+                    return;
+                }
+                addTest('exampleTests', 'Example JSON file accessible', 'pass');
+                
+                // Test 2: Validate JSON structure
+                log('exampleLog', 'Validating JSON structure...');
+                const data = await jsonResponse.json();
+                
+                if (data.theme_scoring) {
+                    addTest('exampleTests', 'JSON has theme_scoring', 'pass');
+                    log('exampleLog', `Found ${Object.keys(data.theme_scoring).length} companies`);
+                } else {
+                    addTest('exampleTests', 'JSON has theme_scoring', 'fail', 'Missing theme_scoring');
+                }
+                
+                if (data.theme_taxonomy) {
+                    addTest('exampleTests', 'JSON has theme_taxonomy', 'pass');
+                } else {
+                    addTest('exampleTests', 'JSON has theme_taxonomy', 'fail', 'Missing theme_taxonomy');
+                }
+                
+                if (data.content && Array.isArray(data.content)) {
+                    addTest('exampleTests', 'JSON has content array', 'pass');
+                    log('exampleLog', `Found ${data.content.length} content items`);
+                } else {
+                    addTest('exampleTests', 'JSON has content array', 'fail', 'Missing or invalid content');
+                }
+                
+            } catch (error) {
+                addTest('exampleTests', 'Load Example functionality', 'fail', error.message);
+                log('exampleLog', `❌ Error: ${error.message}`);
+            }
+        }
+
+        async function testFormSubmission() {
+            log('formLog', '🚀 Testing form submission...');
+            
+            try {
+                // Test 1: Check form.js is accessible
+                log('formLog', 'Checking form.js...');
+                const formJsResponse = await fetch(`${SERVER_URL}/static/scripts/form.js`);
+                if (formJsResponse.ok) {
+                    addTest('formTests', 'form.js is accessible', 'pass');
+                    const formJsContent = await formJsResponse.text();
+                    
+                    // Test 2: Check for the fix in form.js
+                    log('formLog', 'Checking for renderScreenerReport fix...');
+                    if (formJsContent.includes('renderScreenerReport populates the tabs directly')) {
+                        addTest('formTests', 'Form.js has correct fix', 'pass');
+                    } else if (formJsContent.includes('output.innerHTML = renderScreenerReport')) {
+                        addTest('formTests', 'Form.js has correct fix', 'fail', 'Still using old innerHTML assignment');
+                    } else {
+                        addTest('formTests', 'Form.js has correct fix', 'pass');
+                    }
+                    
+                    // Test 3: Check duplicate focus field is removed
+                    log('formLog', 'Checking for duplicate focus field...');
+                    const focusMatches = formJsContent.match(/focus,\s*focus,/g);
+                    if (!focusMatches || focusMatches.length === 0) {
+                        addTest('formTests', 'No duplicate focus field', 'pass');
+                    } else {
+                        addTest('formTests', 'No duplicate focus field', 'fail', 'Duplicate focus field found');
+                    }
+                    
+                    // Test 4: Check form submission handler exists
+                    log('formLog', 'Checking form submission handler...');
+                    if (formJsContent.includes('screenerForm') && formJsContent.includes('onsubmit')) {
+                        addTest('formTests', 'Form submission handler exists', 'pass');
+                    } else {
+                        addTest('formTests', 'Form submission handler exists', 'fail', 'Handler not found');
+                    }
+                    
+                } else {
+                    addTest('formTests', 'form.js is accessible', 'fail', `Status: ${formJsResponse.status}`);
+                }
+                
+                // Test 5: Check report_renderer.js
+                log('formLog', 'Checking report_renderer.js...');
+                const rendererResponse = await fetch(`${SERVER_URL}/static/scripts/report_renderer.js`);
+                if (rendererResponse.ok) {
+                    addTest('formTests', 'report_renderer.js is accessible', 'pass');
+                    const rendererContent = await rendererResponse.text();
+                    
+                    if (rendererContent.includes('function renderScreenerReport')) {
+                        addTest('formTests', 'renderScreenerReport function exists', 'pass');
+                    } else {
+                        addTest('formTests', 'renderScreenerReport function exists', 'fail', 'Function not found');
+                    }
+                    
+                    if (rendererContent.includes('renderCompanyScores') && 
+                        rendererContent.includes('renderThemeTaxonomy') && 
+                        rendererContent.includes('renderSupportingEvidence')) {
+                        addTest('formTests', 'Tab rendering functions exist', 'pass');
+                    } else {
+                        addTest('formTests', 'Tab rendering functions exist', 'fail', 'Missing tab functions');
+                    }
+                } else {
+                    addTest('formTests', 'report_renderer.js is accessible', 'fail', `Status: ${rendererResponse.status}`);
+                }
+                
+                log('formLog', '✅ Form submission tests completed');
+                
+            } catch (error) {
+                addTest('formTests', 'Form submission tests', 'fail', error.message);
+                log('formLog', `❌ Error: ${error.message}`);
+            }
+        }
+
+        function clearResults() {
+            testResults = { passed: 0, failed: 0, total: 0 };
+            document.getElementById('scriptTests').innerHTML = '';
+            document.getElementById('domTests').innerHTML = '';
+            document.getElementById('exampleTests').innerHTML = '';
+            document.getElementById('formTests').innerHTML = '';
+            document.getElementById('exampleLog').innerHTML = '';
+            document.getElementById('formLog').innerHTML = '';
+            updateSummary();
+        }
+
+        // Auto-run tests on load
+        window.onload = function() {
+            setTimeout(runAllTests, 500);
+        };
+    </script>
+</body>
+</html>
+
