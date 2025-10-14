@@ -1,13 +1,21 @@
 document.getElementById('screenerForm').onsubmit = async function (e) {
     e.preventDefault();
-    const output = document.getElementById('output');
     const spinner = document.getElementById('spinner');
     const showJsonBtn = document.getElementById('showJsonBtn');
     const submitBtn = document.querySelector('button[type="submit"]');
-    output.innerHTML = '';
-    output.classList.remove('error');
+    
+    // Close config panel
+    if (window.closeConfigPanel) {
+        closeConfigPanel();
+    }
+    
     showJsonBtn.style.display = 'none';
     lastReport = null;
+    
+    // Reset all tabs
+    if (window.tabController) {
+        window.tabController.reset();
+    }
 
     // Validate date range first
     const startDateInput = document.getElementById('start_date').value;
@@ -16,14 +24,13 @@ document.getElementById('screenerForm').onsubmit = async function (e) {
 
     const dateValidation = validateDateRange(startDateInput, endDateInput, frequencyInput);
     if (!dateValidation.isValid) {
-        output.innerHTML = `<span class="error">❌ ${dateValidation.message}</span>`;
-        output.classList.add('error');
+        alert(`❌ ${dateValidation.message}`);
         return;
     }
 
     // Disable the submit button
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Waiting for response...';
+    submitBtn.textContent = 'Processing...';
 
     try {
         // Gather form data
@@ -36,10 +43,9 @@ document.getElementById('screenerForm').onsubmit = async function (e) {
             companies = foundWatchlist.id;
         }
         else if (!companies) {
-            output.innerHTML = `<span class="error">❌ Error: Company Universe is required.</span>`;
-            output.classList.add('error');
+            alert('❌ Error: Company Universe is required.');
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Run Screener';
+            submitBtn.textContent = 'Run Analysis';
             return;
         }
         const start_date = document.getElementById('start_date').value;
@@ -155,13 +161,23 @@ document.getElementById('screenerForm').onsubmit = async function (e) {
                     if (statusData.status === 'completed' || statusData.status === 'failed') {
                         polling = false;
                         if (statusData.status === 'completed') {
-                            output.innerHTML = renderScreenerReport(statusData.report)
+                            renderScreenerReport(statusData.report);
                             showJsonBtn.style.display = 'inline-block';
                             lastReport = statusData.report;
+                            
+                            // Update config badge for custom analysis
+                            if (window.updateConfigBadge) {
+                                const companiesText = document.getElementById('companies_text').value;
+                                updateConfigBadge({
+                                    theme: theme,
+                                    companies: companiesText || 'Custom Universe',
+                                    isDemo: false
+                                });
+                            }
                         }
                         spinner.style.display = 'none';
                         submitBtn.disabled = false;
-                        submitBtn.textContent = 'Run Screener';
+                        submitBtn.textContent = 'Run Analysis';
                         return;
                     }
                 } catch (err) {
@@ -174,10 +190,9 @@ document.getElementById('screenerForm').onsubmit = async function (e) {
             pollStatus();
         }
     } catch (err) {
-        output.innerHTML = `<span class="error">❌ Error: ${err.message}</span>`;
-        output.classList.add('error');
+        alert(`❌ Error: ${err.message}`);
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Run Screener';
+        submitBtn.textContent = 'Run Analysis';
         spinner.style.display = 'none';
     }
 };

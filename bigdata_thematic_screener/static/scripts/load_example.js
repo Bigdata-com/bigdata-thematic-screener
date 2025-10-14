@@ -1,5 +1,11 @@
 async function loadRequestId(requestId) {
     const showJsonBtn = document.getElementById('showJsonBtn');
+    
+    // Close config panel if open
+    if (window.closeConfigPanel) {
+        closeConfigPanel();
+    }
+    
     showJsonBtn.style.display = 'none';
     lastReport = null;
 
@@ -31,7 +37,7 @@ async function loadRequestId(requestId) {
         logViewer.textContent = 'No logs yet.';
     }
     if (statusData.status === 'completed') {
-        output.innerHTML = renderScreenerReport(statusData.report)
+        renderScreenerReport(statusData.report);
         showJsonBtn.style.display = 'inline-block';
         lastReport = statusData.report;
     }
