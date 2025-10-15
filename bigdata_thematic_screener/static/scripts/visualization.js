@@ -77,6 +77,40 @@ function toggleProcessLogs() {
     }
 }
 
+function resetToStart() {
+    // Hide dashboard, show empty state
+    const emptyState = document.getElementById('emptyState');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+    
+    if (dashboardSection) dashboardSection.classList.add('hidden');
+    if (emptyState) {
+        emptyState.classList.remove('hidden');
+        emptyState.style.display = 'block';
+    }
+    
+    // Hide the new analysis button
+    if (newAnalysisBtn) newAnalysisBtn.style.display = 'none';
+    
+    // Reset config
+    window.currentConfig = { theme: '', companies: '' };
+    
+    // Hide JSON button
+    const showJsonBtn = document.getElementById('showJsonBtn');
+    if (showJsonBtn) showJsonBtn.style.display = 'none';
+    
+    // Clear report
+    window.lastReport = null;
+    
+    // Reset tabs
+    if (window.tabController) {
+        window.tabController.reset();
+    }
+    
+    // Smooth scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // Helper to get URL param
 function getUrlParam(name) {
     const url = new URL(window.location.href);
