@@ -50,7 +50,9 @@ function renderDashboardCards(data) {
     const sortedThemes = Object.entries(themePopularity)
         .sort((a, b) => b[1] - a[1]);
     
-    // Extract current configuration
+    // Extract current configuration - use values as-is (already display-ready)
+    const currentConfig = window.currentConfig || {};
+    
     const config = {
         theme: currentConfig.theme || 'N/A',
         universe: currentConfig.companies || 'N/A',

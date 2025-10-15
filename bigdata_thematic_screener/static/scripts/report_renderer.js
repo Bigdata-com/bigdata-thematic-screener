@@ -22,18 +22,8 @@ function renderScreenerReport(data) {
         renderDashboardCards(data);
     }
 
-    // Update configuration badge
-    if (window.updateConfigBadge) {
-        const form = document.getElementById('screenerForm');
-        if (form) {
-            const config = {
-                theme: form.elements['theme']?.value || '',
-                focus: form.elements['focus']?.value || '',
-                companies: form.elements['companies']?.value || ''
-            };
-            updateConfigBadge(config);
-        }
-    }
+    // Note: Configuration badge is updated by the caller (form.js or config_panel.js)
+    // Don't update it here to avoid overwriting demo configs
 
     // Render exploration tabs (detailed views)
     try {
