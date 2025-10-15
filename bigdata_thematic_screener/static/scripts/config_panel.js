@@ -43,17 +43,17 @@ function closeConfigPanel() {
 function loadQuickStartTemplate(type) {
     const jsonFiles = {
         'supply-chain': {
-            file: '/static/data/example.json',
+            file: '/static/data/example_supply_chain.json',
             theme: 'Supply Chain Reshaping',
             universe: 'Top 100 US Companies'
         },
         'ai-automation': {
-            file: '/static/data/example3.json',
+            file: '/static/data/example_ai_automation.json',
             theme: 'AI & Automation',
             universe: 'Nasdaq 100'
         },
         'climate-tech': {
-            file: '/static/data/example2.json',
+            file: '/static/data/example_climate_tech.json',
             theme: 'Climate Technology',
             universe: 'Top 100 US Companies'
         }
