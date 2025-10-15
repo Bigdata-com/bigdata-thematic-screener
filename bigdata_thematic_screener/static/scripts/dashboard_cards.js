@@ -116,6 +116,9 @@ function renderAtAGlanceCard(totalCompanies, totalThemes, maxScore, totalEvidenc
                             <div class="text-base text-white font-semibold">
                                 Period: Last 4 quarters
                             </div>
+                            <div class="text-base text-white font-semibold">
+                                Report generated on: 10/15/2025
+                            </div>
                         ` : ''}
                     </div>
                 </div>
