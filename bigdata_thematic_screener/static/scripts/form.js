@@ -12,6 +12,27 @@ document.getElementById('screenerForm').onsubmit = async function (e) {
     showJsonBtn.style.display = 'none';
     lastReport = null;
     
+    // Reset frontend: hide results, show empty state, clear dashboard
+    const emptyState = document.getElementById('emptyState');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const dashboardCards = document.getElementById('dashboardCards');
+    
+    if (emptyState) emptyState.style.display = 'none';
+    if (dashboardSection) dashboardSection.classList.add('hidden');
+    if (dashboardCards) dashboardCards.innerHTML = '';
+    
+    // Open process logs
+    const logViewerContainer = document.getElementById('logViewerContainer');
+    const logsIcon = document.getElementById('logsIcon');
+    if (logViewerContainer && logViewerContainer.classList.contains('hidden')) {
+        logViewerContainer.classList.remove('hidden');
+        if (logsIcon) logsIcon.style.transform = 'rotate(180deg)';
+    }
+    
+    // Clear logs
+    const logViewer = document.getElementById('logViewer');
+    if (logViewer) logViewer.innerHTML = '<div class="text-zinc-400">Starting analysis...</div>';
+    
     // Reset all tabs
     if (window.tabController) {
         window.tabController.reset();
@@ -161,19 +182,20 @@ document.getElementById('screenerForm').onsubmit = async function (e) {
                     if (statusData.status === 'completed' || statusData.status === 'failed') {
                         polling = false;
                         if (statusData.status === 'completed') {
-                            renderScreenerReport(statusData.report);
-                            showJsonBtn.style.display = 'inline-block';
-                            lastReport = statusData.report;
-                            
-                            // Update config badge for custom analysis
+                            // Update config badge BEFORE rendering so dashboard has access to it
                             if (window.updateConfigBadge) {
-                                const companiesText = document.getElementById('companies_text').value;
+                                // Use exactly what the user typed for display
+                                const companiesText = document.getElementById('companies_text').value.trim();
                                 updateConfigBadge({
                                     theme: theme,
                                     companies: companiesText || 'Custom Universe',
                                     isDemo: false
                                 });
                             }
+                            
+                            renderScreenerReport(statusData.report);
+                            showJsonBtn.style.display = 'inline-block';
+                            lastReport = statusData.report;
                         }
                         spinner.style.display = 'none';
                         submitBtn.disabled = false;

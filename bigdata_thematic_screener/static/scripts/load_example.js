@@ -8,6 +8,20 @@ async function loadRequestId(requestId) {
     
     showJsonBtn.style.display = 'none';
     lastReport = null;
+    
+    // Reset frontend: hide empty state, clear dashboard
+    const emptyState = document.getElementById('emptyState');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const dashboardCards = document.getElementById('dashboardCards');
+    
+    if (emptyState) emptyState.style.display = 'none';
+    if (dashboardSection) dashboardSection.classList.add('hidden');
+    if (dashboardCards) dashboardCards.innerHTML = '';
+    
+    // Reset tabs
+    if (window.tabController) {
+        window.tabController.reset();
+    }
 
     const params = new URLSearchParams();
     const token = getUrlParam('token');

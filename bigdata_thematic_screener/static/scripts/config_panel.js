@@ -1,11 +1,12 @@
 // Configuration Panel - Sliding Side Panel
-let currentConfig = {
+window.currentConfig = {
     theme: '',
     focus: '',
     companies: '',
     start_date: '',
     end_date: ''
 };
+let currentConfig = window.currentConfig;
 
 function toggleConfigPanel() {
     const panel = document.getElementById('configPanel');
@@ -62,6 +63,20 @@ function loadQuickStartTemplate(type) {
     if (template) {
         closeConfigPanel();
         
+        // Reset frontend: hide empty state, clear dashboard
+        const emptyState = document.getElementById('emptyState');
+        const dashboardSection = document.getElementById('dashboardSection');
+        const dashboardCards = document.getElementById('dashboardCards');
+        
+        if (emptyState) emptyState.style.display = 'none';
+        if (dashboardSection) dashboardSection.classList.add('hidden');
+        if (dashboardCards) dashboardCards.innerHTML = '';
+        
+        // Reset tabs
+        if (window.tabController) {
+            window.tabController.reset();
+        }
+        
         // Show spinner
         const spinner = document.getElementById('spinner');
         if (spinner) spinner.classList.remove('hidden');
@@ -101,11 +116,13 @@ function loadQuickStartTemplate(type) {
 }
 
 function updateConfigBadge(config) {
+    // Update both local and global references
     currentConfig = { ...currentConfig, ...config };
+    window.currentConfig = currentConfig;
     
     const badge = document.getElementById('currentConfigBadge');
     if (badge && currentConfig.theme) {
-        const universe = getUniverseName(currentConfig.companies);
+        const universe = currentConfig.companies || 'Unknown';
         const runTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         
         badge.innerHTML = `
@@ -154,4 +171,5 @@ window.toggleConfigPanel = toggleConfigPanel;
 window.closeConfigPanel = closeConfigPanel;
 window.loadQuickStartTemplate = loadQuickStartTemplate;
 window.updateConfigBadge = updateConfigBadge;
+window.getUniverseName = getUniverseName;
 
