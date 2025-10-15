@@ -51,7 +51,7 @@ Or simply don't set the variable at all.
 2. **Configuration Panel**: 
    - Form fields are still visible (users can see what parameters exist)
    - The "Run Analysis" button is replaced with a disabled button showing a lock icon
-   - Message displayed: *"Demo mode activated. Please contact support@bigdata.com for access to the full version."*
+   - Message displayed: *"Demo mode activated. For access to the full version, please contact support@bigdata.com or deploy your own version from GitHub."*
 3. **Quick Start Demos**: Work normally, loading pre-computed JSON files
 
 ### When Demo Mode is Disabled
@@ -83,7 +83,8 @@ Or simply don't set the variable at all.
   🔒 Run Analysis (Disabled)
 </button>
 <p class="text-amber-400">
-  Demo mode activated. Please contact support@bigdata.com for access.
+  Demo mode activated. For access to the full version, please contact 
+  support@bigdata.com or deploy your own version from GitHub.
 </p>
 ```
 
@@ -104,7 +105,8 @@ Or simply don't set the variable at all.
 3. Open the web interface and verify:
    - ✅ Quick start demos load correctly
    - ✅ "Run Analysis" button is disabled and grayed out
-   - ✅ Support contact message is displayed
+   - ✅ Support contact message is displayed with both email and GitHub links
+   - ✅ GitHub link opens in new tab to the repository
    - ✅ Configuration panel shows "View Configuration"
 
 ### Integration with Docker
@@ -123,12 +125,14 @@ docker run -e DEMO_MODE=true bigdata-thematic-screener
 
 ## Support Contact
 
-The demo mode message directs users to: **support@bigdata.com**
+The demo mode message provides two options for users:
 
-To customize this email, modify the template in `index.html.jinja` line 365:
-```html
-<a href="mailto:support@bigdata.com">support@bigdata.com</a>
-```
+1. **Contact support**: [support@bigdata.com](mailto:support@bigdata.com)
+2. **Deploy from GitHub**: [https://github.com/Bigdata-com/bigdata-thematic-screener](https://github.com/Bigdata-com/bigdata-thematic-screener)
+
+This gives users the flexibility to either request enterprise access or deploy their own instance using the open-source repository.
+
+To customize these links, modify the template in `index.html.jinja` around line 365.
 
 ## Reverting to Full Mode
 
