@@ -102,6 +102,10 @@ function loadQuickStartTemplate(type) {
                 const showJsonBtn = document.getElementById('showJsonBtn');
                 if (showJsonBtn) showJsonBtn.style.display = 'inline-block';
                 
+                // Show new analysis button
+                const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+                if (newAnalysisBtn) newAnalysisBtn.style.display = 'inline-flex';
+                
                 // Render the report
                 if (window.renderScreenerReport) {
                     renderScreenerReport(data);

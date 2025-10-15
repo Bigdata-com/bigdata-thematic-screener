@@ -16,6 +16,10 @@ function renderScreenerReport(data) {
     
     if (emptyState) emptyState.classList.add('hidden');
     if (dashboardSection) dashboardSection.classList.remove('hidden');
+    
+    // Show new analysis button
+    const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+    if (newAnalysisBtn) newAnalysisBtn.style.display = 'inline-flex';
 
     // Render dashboard cards first (main insights)
     if (window.renderDashboardCards) {
