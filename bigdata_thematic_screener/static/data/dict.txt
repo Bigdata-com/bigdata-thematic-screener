@@ -1,3 +1,0 @@
-example.json Top US 100 Theme: Supply Chain Reshaping Focus: Logistics automation, nearshoring strategies, and supply chain digitalization
-example2.json Top US 100 Theme: Climate Technology  Focus: Renewable energy, carbon capture
-example3.jsonMachine Learnings & Workflow Automation  Theme: AI & Automation Focus: Machine Learnings & Workflow Automation 
