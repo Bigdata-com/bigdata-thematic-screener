@@ -86,7 +86,7 @@
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
       </svg>
-      Custom Configuration
+      {% if demo_mode %}View Configuration{% else %}Custom Configuration{% endif %}
     </button>
   </div>
 </div>
@@ -353,6 +353,18 @@
 
       <!-- Action Buttons -->
       <div class="space-y-3 pt-4 border-t border-zinc-700">
+        {% if demo_mode %}
+        <button type="button" disabled
+          class="w-full flex items-center justify-center gap-2 text-zinc-500 bg-zinc-700 cursor-not-allowed font-bold rounded-lg text-base px-6 py-4 opacity-50">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          Run Analysis (Disabled)
+        </button>
+        <p class="text-xs text-amber-400 text-center leading-relaxed">
+          Demo mode activated. Please contact <a href="mailto:support@bigdata.com" class="underline hover:text-amber-300 transition-colors">support@bigdata.com</a> for access to the full version.
+        </p>
+        {% else %}
         <button type="submit"
           class="w-full flex items-center justify-center gap-2 text-white bg-blue-600 hover:bg-blue-700 font-bold rounded-lg text-base px-6 py-4 transition-colors shadow-lg">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -361,6 +373,7 @@
           </svg>
           Run Analysis
         </button>
+        {% endif %}
       </div>
     </form>
   </div>
