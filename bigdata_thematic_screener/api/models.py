@@ -152,6 +152,7 @@ class ThematicScreenRequest(BaseModel):
                         {
                             "type": "value_error",
                             "loc": ("start_date", "end_date"),
+                            "input": values,
                             "ctx": {
                                 "error": "start_date must be earlier than end_date"
                             },
@@ -166,10 +167,7 @@ class ThematicScreenRequest(BaseModel):
                         "type": "value_error",
                         "loc": ("start_date", "end_date"),
                         "ctx": {"error": f"Invalid date format or range: {e}"},
-                        "input": {
-                            "start_date": values["start_date"],
-                            "end_date": values["end_date"],
-                        },
+                        "input": values,
                     }
                 ],
             )
@@ -185,6 +183,7 @@ class ThematicScreenRequest(BaseModel):
                     {
                         "type": "value_error",
                         "loc": ("document_type",),
+                        "input": values,
                         "ctx": {"error": "document_type must be specified."},
                     }
                 ],
@@ -196,6 +195,7 @@ class ThematicScreenRequest(BaseModel):
                     {
                         "type": "value_error",
                         "loc": ("document_type",),
+                        "input": values,
                         "ctx": {
                             "error": f"Invalid document_type: {doc_type}, possible values are: {list(DocumentType.__members__.keys())}"
                         },
@@ -213,6 +213,7 @@ class ThematicScreenRequest(BaseModel):
                     {
                         "type": "value_error",
                         "loc": ("fiscal_year",),
+                        "input": values,
                         "ctx": {
                             "error": "fiscal_year must be specified when document_type is TRANSCRIPT or FILING."
                         },
@@ -237,6 +238,7 @@ class ThematicScreenRequest(BaseModel):
                         "ctx": {
                             "error": "fiscal_year must not be specified when document_type is not TRANSCRIPT or FILING."
                         },
+                        "input": values,
                     }
                 ],
             )
