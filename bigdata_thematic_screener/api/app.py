@@ -10,7 +10,6 @@ from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_thematic_screener import LOG_LEVEL, __version__, logger
-from bigdata_thematic_screener.api.examples import EXAMPLE_UUID
 from bigdata_thematic_screener.api.models import (
     ExampleWatchlists,
     ThematicScreenerAcceptedResponse,
@@ -59,12 +58,6 @@ def lifespan(app: FastAPI):
         },
     )
     create_db_and_tables()
-
-    # Initialize the database with example data
-    with Session(engine) as session:
-        storage_manager = StorageManager(session)
-        storage_manager.initialize_with_example_data()
-
     yield
 
 
@@ -94,7 +87,6 @@ def health_check():
 async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     # Get example values from the schema for all fields
     example_values = get_example_values_from_schema(ThematicScreenRequest)
-    example_values["example_request_id"] = str(EXAMPLE_UUID)
     example_values["demo_mode"] = settings.DEMO_MODE
 
     return HTMLResponse(
