@@ -143,16 +143,6 @@ function updateConfigBadge(config) {
     }
 }
 
-function getUniverseName(universeId) {
-    // Try to find the universe name from the watchlists
-    if (window.watchlists) {
-        const watchlist = window.watchlists.find(w => w.id === universeId);
-        if (watchlist) return watchlist.name;
-    }
-    
-    // Fallback to ID
-    return universeId || 'Unknown';
-}
 
 // Initialize config panel on DOM ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -175,5 +165,4 @@ window.toggleConfigPanel = toggleConfigPanel;
 window.closeConfigPanel = closeConfigPanel;
 window.loadQuickStartTemplate = loadQuickStartTemplate;
 window.updateConfigBadge = updateConfigBadge;
-window.getUniverseName = getUniverseName;
 

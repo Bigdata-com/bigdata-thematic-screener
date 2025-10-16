@@ -170,5 +170,3 @@ function copyJson() {
         document.body.removeChild(textarea);
     }
 };
-
-// Drag-to-resize functionality removed (now using horizontal layout)
