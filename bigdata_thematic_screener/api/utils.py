@@ -2,12 +2,6 @@ from typing import Type
 
 from pydantic import BaseModel
 
-from bigdata_thematic_screener.api.examples import EXAMPLE_REPORT, EXAMPLE_STATUS
-from bigdata_thematic_screener.api.sql_models import (
-    SQLThematicScreenerReport,
-    SQLWorkflowStatus,
-)
-
 
 def get_example_values_from_schema(schema_model: Type[BaseModel]) -> dict:
     """
@@ -29,14 +23,3 @@ def get_example_values_from_schema(schema_model: Type[BaseModel]) -> dict:
         else:
             example_values[field_name] = field.default
     return example_values
-
-
-def status_report_example_models() -> tuple[
-    SQLWorkflowStatus, SQLThematicScreenerReport
-]:
-    """
-    Returns a tuple with example instances of SQLWorkflowStatus and SQLThematicScreenerReport models.
-    To use for initialization of the database with example data.
-    """
-
-    return EXAMPLE_STATUS, EXAMPLE_REPORT
