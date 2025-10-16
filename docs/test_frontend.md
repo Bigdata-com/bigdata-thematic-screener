@@ -1,4 +1,5 @@
-# Frontend Redesign - Testing Checklist
+# Testing checklist for the web application
+Ideally, all this checks should be automated with something like Playwright, but for now this is a manual checklist to ensure all features are working as expected.
 
 ## Pre-Testing Setup
 - [ ] Ensure application server is running
@@ -198,29 +199,3 @@
 - [ ] User experience is smooth and intuitive
 - [ ] Documentation is accurate
 - [ ] Ready for production deployment
-
----
-
-## Notes
-Record any issues found during testing:
-
-**Issues Found:**
-1. 
-2. 
-3. 
-
-**Browser-Specific Issues:**
-1. 
-2. 
-3. 
-
-**Performance Concerns:**
-1. 
-2. 
-3. 
-
-**Recommendations:**
-1. 
-2. 
-3. 
-

@@ -1,4 +1,5 @@
 # Frontend Quick Start Guide
+Note that this guide was AI-generated, but it still provides an useful overview of the frontend code structure and key components. Please refer to the actual code files for the most accurate and up-to-date information.
 
 ## For Developers
 
