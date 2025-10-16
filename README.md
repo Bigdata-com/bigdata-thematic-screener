@@ -146,6 +146,22 @@ curl -X 'GET' \
   -H 'accept: application/json'
 ```
 
+## Demo Mode
+The Thematic Screener supports a **Demo Mode** that allows users to explore pre-computed examples without the ability to run custom analyses. This is perfect for public demonstrations, sales presentations, or training environments where you want to showcase the service capabilities without incurring API costs or requiring credentials.
+
+When Demo Mode is enabled, users can access all visualizations (heatmaps, company cards, mindmaps, and evidence tables) using pre-loaded sample data for Supply Chain, AI & Automation, and Climate Tech themes. However, the "Run Analysis" button is disabled, preventing new custom analyses. Demo mode is a **frontend-only restriction**.
+
+To enable Demo Mode, set the `DEMO_MODE` environment variable:
+
+```bash
+docker run -d \
+  --name bigdata_thematic_screener \
+  -p 8000:8000 \
+  -e DEMO_MODE=true \
+  ghcr.io/bigdata-com/bigdata_thematic_screener:latest
+```
+
+
 # Install and for development locally
 ```bash
 uv sync --dev
