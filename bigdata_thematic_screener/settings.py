@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN: str | None = None
 
     # Demo mode - disables "Run Analysis" functionality, only allows pre-computed demos
+    # Only affects the frontend, to protect the backend, set ACCESS_TOKEN
     DEMO_MODE: bool = False
 
     TEMPLATES_DIR: str = str(
