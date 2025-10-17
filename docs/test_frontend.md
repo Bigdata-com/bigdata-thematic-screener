@@ -139,14 +139,6 @@ Ideally, all this checks should be automated with something like Playwright, but
 - [ ] Resize back to desktop
 - [ ] Layout returns to normal
 
-## Drag-to-Resize Test
-- [ ] Hover over dragbar between sidebar and content
-- [ ] Cursor changes to resize cursor
-- [ ] Drag left to shrink sidebar
-- [ ] Sidebar width decreases
-- [ ] Drag right to expand sidebar
-- [ ] Sidebar width increases (up to max)
-- [ ] Form content reflows appropriately
 
 ## Browser Console Test
 - [ ] Open browser developer console
