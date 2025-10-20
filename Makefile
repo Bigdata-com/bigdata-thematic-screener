@@ -12,5 +12,8 @@ lint-check:
 format:
 	@uvx ruff format bigdata_thematic_screener/ tests/
 
+format-check:
+	@uvx ruff format --check bigdata_thematic_screener/ tests/
+
 type-check:
 	@uvx ty check bigdata_thematic_screener/ tests/
