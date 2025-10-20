@@ -7,8 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.1] - 20-10-2025
 
+### Added
+- Display version number in the frontend.
+
 ### Fixed
 - Bigdata and OpenAI API keys are no longer required to start the service when DEMO_MODE is enabled.
+- CI pipeline was not detecting formatting issues.
 
 ## [2.5.0] - 17-10-2025
 
