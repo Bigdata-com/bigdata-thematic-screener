@@ -15,7 +15,6 @@ bigdata_thematic_screener/
 │       ├── evidence_table.js      # Evidence tab table
 │       ├── report_renderer.js     # Main orchestrator
 │       ├── form.js                # Form submission
-│       ├── load_example.js        # Example loading
 │       ├── validators.js          # Form validation
 │       └── visualization.js       # Shared utilities
 └── templates/
