@@ -61,7 +61,7 @@ class StorageManager:
             workflow_status = self._get_workflow_status(request_id)
             if workflow_status is None:
                 return None
-            return workflow_status.status
+            return WorkflowStatus(workflow_status.status)
 
     def log_message(self, request_id: UUID, message: str):
         with self.lock:
@@ -116,7 +116,7 @@ class StorageManager:
                 return ThematicScreenerStatusResponse(
                     request_id=str(request_id),
                     last_updated=workflow_status.last_updated,
-                    status=workflow_status.status,
+                    status=WorkflowStatus(workflow_status.status),
                     logs=workflow_status.logs,
                     report=None,
                 )
@@ -124,7 +124,7 @@ class StorageManager:
             return ThematicScreenerStatusResponse(
                 request_id=str(request_id),
                 last_updated=workflow_status.last_updated,
-                status=workflow_status.status,
+                status=WorkflowStatus(workflow_status.status),
                 logs=workflow_status.logs,
                 report=ThematicScreenerResponse(**sql_report.screener_report),  # ty: ignore[missing-argument]
             )
