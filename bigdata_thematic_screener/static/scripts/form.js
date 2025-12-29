@@ -10,7 +10,7 @@ document.getElementById('screenerForm').onsubmit = async function (e) {
     }
     
     showJsonBtn.style.display = 'none';
-    lastReport = null;
+    window.lastReport = null;
     
     // Reset frontend: hide results, show empty state, clear dashboard
     const emptyState = document.getElementById('emptyState');
@@ -195,7 +195,7 @@ document.getElementById('screenerForm').onsubmit = async function (e) {
                             
                             renderScreenerReport(statusData.report);
                             showJsonBtn.style.display = 'inline-block';
-                            lastReport = statusData.report;
+                            window.lastReport = statusData.report;
                         }
                         spinner.style.display = 'none';
                         submitBtn.disabled = false;
