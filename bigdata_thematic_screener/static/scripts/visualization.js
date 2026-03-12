@@ -169,3 +169,102 @@ function copyJson() {
         document.body.removeChild(textarea);
     }
 };
+
+function downloadJson() {
+    if (!window.lastReport) {
+        alert('No report data to download.');
+        return;
+    }
+    
+    const btn = document.getElementById('downloadBtn');
+    const jsonString = JSON.stringify(window.lastReport, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Generate filename with theme and timestamp
+    const theme = window.lastReport.theme_taxonomy?.theme || 'thematic_screener';
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename = `${theme.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${timestamp}.json`;
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    // Show feedback
+    if (btn) {
+        const origHTML = btn.innerHTML;
+        btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Downloaded!`;
+        setTimeout(() => { btn.innerHTML = origHTML; }, 1500);
+    }
+}
+
+function uploadJson(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.name.endsWith('.json') && file.type !== 'application/json') {
+        alert('Please select a valid JSON file.');
+        event.target.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // Validate the JSON structure has expected fields
+            if (!data.theme_scoring && !data.theme_taxonomy && !data.content) {
+                alert('Invalid thematic screener JSON file. Missing required fields.');
+                return;
+            }
+            
+            // Store the report
+            window.lastReport = data;
+            
+            // Update config badge if we have theme info
+            if (window.updateConfigBadge && data.theme_taxonomy) {
+                updateConfigBadge({
+                    theme: data.theme_taxonomy.theme || 'Loaded Report',
+                    companies: 'Uploaded JSON',
+                    isDemo: false
+                });
+            }
+            
+            // Render the report
+            renderScreenerReport(data);
+            
+            // Show JSON button
+            const showJsonBtn = document.getElementById('showJsonBtn');
+            if (showJsonBtn) showJsonBtn.style.display = 'inline-block';
+            
+            // Close config panel if open
+            if (window.closeConfigPanel) {
+                closeConfigPanel();
+            }
+            
+            // Scroll to results
+            const dashboardSection = document.getElementById('dashboardSection');
+            if (dashboardSection) {
+                dashboardSection.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+        } catch (err) {
+            alert('Error parsing JSON file: ' + err.message);
+        }
+    };
+    
+    reader.onerror = function() {
+        alert('Error reading file.');
+    };
+    
+    reader.readAsText(file);
+    
+    // Reset input so the same file can be selected again
+    event.target.value = '';
+}
