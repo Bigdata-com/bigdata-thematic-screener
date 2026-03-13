@@ -91,6 +91,7 @@ async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     template_values = get_example_values_from_schema(ThematicScreenRequest)
     template_values["demo_mode"] = settings.DEMO_MODE
     template_values["version"] = f"v{__version__}"
+    template_values["fmp_api_key"] = settings.FMP_API_KEY
 
     return HTMLResponse(
         content=loader.get_template("api/index.html.jinja").render(

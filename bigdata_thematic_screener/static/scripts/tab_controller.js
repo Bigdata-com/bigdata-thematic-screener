@@ -7,7 +7,8 @@ class TabController {
             summary: false,
             companies: false,
             mindmap: false,
-            evidence: false
+            evidence: false,
+            etfs: false
         };
     }
 

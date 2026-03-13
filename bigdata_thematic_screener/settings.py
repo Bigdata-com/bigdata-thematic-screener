@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Literal
 
 from pydantic import field_validator, model_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from bigdata_thematic_screener import logger
 
@@ -12,6 +12,8 @@ UNSET: Literal["<UNSET>"] = "<UNSET>"
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
     # Demo mode - disables "Run Analysis" functionality, only allows pre-computed demos
     # Only affects the frontend, to protect the backend, set ACCESS_TOKEN
     DEMO_MODE: bool = False
@@ -19,6 +21,9 @@ class Settings(BaseSettings):
     # Required, except on demo mode
     BIGDATA_API_KEY: str | Literal["<UNSET>"] = UNSET
     OPENAI_API_KEY: str | Literal["<UNSET>"] = UNSET
+
+    # Optional: Financial Modeling Prep API key for ETF exposure lookups
+    FMP_API_KEY: str = ""
 
     # Set access token to enable authentication on the endpoints
     ACCESS_TOKEN: str | None = None
