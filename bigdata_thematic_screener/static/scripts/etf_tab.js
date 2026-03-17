@@ -208,7 +208,6 @@ function renderEtfResultsTable(results, topN) {
                         <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">ETF</th>
                         <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600 min-w-[220px]">Theme Concentration Score</th>
                         <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-center text-sm font-semibold text-white border-b border-zinc-600">Holdings Match</th>
-                        <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-right text-sm font-semibold text-white border-b border-zinc-600">Avg Weight</th>
                         <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-right text-sm font-semibold text-white border-b border-zinc-600">Est. AUM</th>
                     </tr>
                 </thead>
@@ -253,9 +252,20 @@ function renderEtfResultsTable(results, topN) {
                             </div>
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
-                            <span class="text-emerald-400 font-bold">${etf.matchCount}</span><span class="text-zinc-500">/${topN}</span>
+                            <span class="relative cursor-pointer group inline-block">
+                                <span class="text-emerald-400 font-bold">${etf.matchCount}</span><span class="text-zinc-500">/${topN}</span>
+                                <svg class="w-3 h-3 inline-block ml-0.5 text-zinc-500 group-hover:text-zinc-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="hidden group-hover:block absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-xs">
+                                    <div class="bg-zinc-900 border border-zinc-600 rounded-lg shadow-xl px-3 py-2 text-left">
+                                        <div class="text-xs text-zinc-400 mb-1">Matched Holdings</div>
+                                        <div class="flex flex-wrap gap-1">${(etf.matchedTickers || []).map(t => `<span class="bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded text-xs font-mono font-medium">${escapeHtml(t)}</span>`).join('')}</div>
+                                    </div>
+                                    <div class="w-2 h-2 bg-zinc-900 border-r border-b border-zinc-600 rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1"></div>
+                                </div>
+                            </span>
                         </td>
-                        <td class="px-4 py-3 text-sm text-right text-zinc-300">${etf.avgWeight.toFixed(2)}%</td>
                         <td class="px-4 py-3 text-sm text-right text-zinc-300">${etf.estAum > 0 ? formatCurrency(etf.estAum) : '—'} <span class="text-zinc-600 text-xs">Est.</span></td>
                     </tr>`;
     });
@@ -325,10 +335,6 @@ function showEtfMethodologyModal() {
             <div>
               <span class="font-semibold text-gray-900">Holdings Match</span> — 
               How many of your top N thematic tickers this ETF holds. Shown as <em>matched / total</em> (e.g. 7/10).
-            </div>
-            <div>
-              <span class="font-semibold text-gray-900">Avg Weight</span> — 
-              Theme Concentration Score ÷ Holdings Match. The average portfolio weight per matched thematic stock. A high value means the ETF holds meaningful positions in your thematic tickers, not just token amounts.
             </div>
             <div>
               <span class="font-semibold text-gray-900">Est. AUM</span> — 
