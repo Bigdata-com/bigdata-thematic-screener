@@ -12,7 +12,9 @@ UNSET: Literal["<UNSET>"] = "<UNSET>"
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
 
     # Demo mode - disables "Run Analysis" functionality, only allows pre-computed demos
     # Only affects the frontend, to protect the backend, set ACCESS_TOKEN
