@@ -33,6 +33,8 @@ docker run -d \
   bigdata_thematic_screener
 ```
 
+Add `-e FMP_API_KEY=<fmp-api-key-here>` if you want the optional ETF tab (see [ETF tab](#etf-tab-optional)).
+
 2. **Run directly from GitHub Container Registry:**
 
 ```bash
@@ -43,6 +45,8 @@ docker run -d \
   -e OPENAI_API_KEY=<openai-api-key-here> \
   ghcr.io/bigdata-com/bigdata_thematic_screener:latest
 ```
+
+Add `-e FMP_API_KEY=<fmp-api-key-here>` for the optional ETF tab ([details below](#etf-tab-optional)).
 
 This will start the thematic screener service locally on port 8000. You can then access the service @ `http://localhost:8000/` and the documentation for the API @ `http://localhost:8000/docs`.
 
@@ -60,6 +64,13 @@ A thematic screener report provides an executive summary of financially relevant
 
 ### Using the UI
 There is a simple UI available @ `http://localhost:8000/` where you can set your parameters and receive an easy-to-read summary of the thematic screening results.
+
+### ETF tab (optional)
+After a thematic report is available (the run produced **theme scoring** for your company basket), open the **ETFs** tab to explore funds whose holdings overlap that basket. The tab ranks ETFs by estimated thematic weight in the basket and includes an in-app **How it works** explanation of the methodology.
+
+**Data source and `FMP_API_KEY`:** ETF and holdings data come from [Financial Modeling Prep](https://financialmodelingprep.com/) (FMP). Set the environment variable **`FMP_API_KEY`** to your FMP API key. The service calls FMP **only from the server**; the key is never exposed to the browser. If `FMP_API_KEY` is unset or empty, the tab still appears but live ETF lookup is disabled and the UI states that the server must be configured.
+
+**Controls:** You can choose how many basket names to use, how many ETFs to list, optionally add extra tickers (merge or replace the basket list), and optionally score specific **focus** ETFs via holdings-based analysis.
 
 ### Programmatically
 
@@ -106,46 +117,6 @@ The response will include:
 
 For more details on the parameters, refer to the API documentation @ `http://localhost:8000/docs`.
 
-## Enable access token protection
-You can optionally protect the API endpoints using an access token. To enable this feature, set the `ACCESS_TOKEN` environment variable when running the Docker container. For example:
-
-```bash
-docker run -d \
-  --name bigdata_thematic_screener \
-  -p 8000:8000 \
-  -e BIGDATA_API_KEY=<bigdata-api-key-here> \
-  -e OPENAI_API_KEY=<openai-apikey-here> \
-  -e ACCESS_TOKEN=<access-token-here> \
-  ghcr.io/bigdata-com/bigdata_thematic_screener:latest
-```
-
-Then all API requests must include a `token` query parameter with the correct value to be authorized. For example:
-
-#### Step 1: Start the analysis with token authentication
-```bash
-curl -X 'POST' \
-  'http://localhost:8000/thematic-screener?token=<access-token-here>' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "theme": "Supply Chain Reshaping",
-    "focus": "Logistics",
-    "companies": "44118802-9104-4265-b97a-2e6d88d74893",
-    "start_date": "2024-01-01",
-    "end_date": "2025-08-26",
-    "fiscal_year": 2024,
-    "document_type": "TRANSCRIPTS",
-    "frequency": "M"
-  }'
-```
-
-#### Step 2: Check status with token authentication
-```bash
-curl -X 'GET' \
-  'http://localhost:8000/status/12345678-1234-1234-1234-123456789abc?token=<access-token-here>' \
-  -H 'accept: application/json'
-```
-
 ## Demo Mode
 The Thematic Screener supports a **Demo Mode** that allows users to explore pre-computed examples without the ability to run custom analyses. This is perfect for public demonstrations, sales presentations, or training environments where you want to showcase the service capabilities without incurring API costs or requiring credentials.
 
@@ -167,11 +138,22 @@ docker run -d \
 uv sync --dev
 ```
 
+Copy [`.env.example`](.env.example) to `.env` and set your keys (never commit `.env`). Alternatively, export variables in your shell.
+
 To run the service, you need an API key from Bigdata.com set on the environment variable `BIGDATA_API_KEY` and additionally provide an API key from a supported LLM provider, for now OpenAI.
+
+Optional **`FMP_API_KEY`:** enables the [ETF tab](#etf-tab-optional); used only on the server when calling FMP (see that section).
+
+Optional **`ACCESS_TOKEN`:** if you set this to a non-empty string, the app requires the same value as the **`token` query parameter** on protected API routes and on the main UI URL (for example `http://localhost:8000/?token=your-secret`). If it is **not** set (the default), no `token` parameter is required. This is a simple shared-secret gate, not full user authentication.
+
 ```bash
 # Set environment variables
 export BIGDATA_API_KEY=<bigdata-api-key-here>
 export OPENAI_API_KEY=<openai-api-key-here>
+# Optional — ETF tab (FMP):
+# export FMP_API_KEY=<fmp-api-key-here>
+# Optional — require ?token=... on API + UI:
+# export ACCESS_TOKEN=<your-chosen-secret>
 ```
 
 Then, the following command will start the thematic screener service locally on port 8000.

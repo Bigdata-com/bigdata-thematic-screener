@@ -10,7 +10,11 @@ from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_thematic_screener import LOG_LEVEL, __version__, logger
+from bigdata_thematic_screener.api.fmp_etf import run_etf_exposure_pipeline
 from bigdata_thematic_screener.api.models import (
+    EtfExposureItem,
+    EtfExposureRequest,
+    EtfExposureResponse,
     ExampleWatchlists,
     ThematicScreenerAcceptedResponse,
     ThematicScreenerStatusResponse,
@@ -81,6 +85,33 @@ def health_check():
     return {"status": "ok", "version": __version__}
 
 
+@app.post(
+    "/api/etf-exposure",
+    summary="Aggregate ETF exposure for thematic tickers (FMP via server)",
+    response_model=EtfExposureResponse,
+)
+def etf_exposure(
+    body: Annotated[EtfExposureRequest, Body()],
+    _: str = Security(query_scheme),
+) -> EtfExposureResponse:
+    if not settings.FMP_API_KEY.strip():
+        raise HTTPException(
+            status_code=503,
+            detail="FMP API key is not configured. Set FMP_API_KEY to enable ETF lookups.",
+        )
+    raw_etfs, total_used, warnings = run_etf_exposure_pipeline(
+        theme_scoring=body.theme_scoring,
+        top_n=body.top_n,
+        top_k=body.top_k,
+        api_key=settings.FMP_API_KEY,
+        extra_tickers=body.extra_tickers,
+        etf_symbols_filter=body.etf_symbols_filter,
+        tickers_mode=body.tickers_mode,
+    )
+    items = [EtfExposureItem(**e) for e in raw_etfs]
+    return EtfExposureResponse(etfs=items, total_tickers_used=total_used, warnings=warnings)
+
+
 @app.get(
     "/",
     summary="Example frontend for testing the thematic screener.",
@@ -91,7 +122,7 @@ async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     template_values = get_example_values_from_schema(ThematicScreenRequest)
     template_values["demo_mode"] = settings.DEMO_MODE
     template_values["version"] = f"v{__version__}"
-    template_values["fmp_api_key"] = settings.FMP_API_KEY
+    template_values["fmp_etf_lookup_enabled"] = bool(settings.FMP_API_KEY.strip())
 
     return HTMLResponse(
         content=loader.get_template("api/index.html.jinja").render(
