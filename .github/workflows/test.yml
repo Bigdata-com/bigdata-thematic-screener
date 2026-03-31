@@ -5,6 +5,9 @@ on:
     - master
   pull_request:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -43,5 +46,7 @@ jobs:
           enable-cache: true
       - name: Install dependencies
         run: uv sync --locked --dev
+      - name: Create coverage output directory
+        run: mkdir -p coverage-reports
       - name: Test with pytest
         run: make tests

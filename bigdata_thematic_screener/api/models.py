@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 from enum import Enum, StrEnum
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 from bigdata_client.models.search import DocumentType
 from pydantic import BaseModel, Field, model_validator
@@ -37,6 +37,13 @@ class WorkflowStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED = "failed"
+
+
+class TickersBasketMode(StrEnum):
+    """How the Tickers text field combines with top N from the report."""
+
+    merge = "merge"
+    only = "only"
 
 
 class WatchlistExample(BaseModel):
@@ -298,3 +305,46 @@ class ThematicScreenerStatusResponse(BaseModel):
     status: WorkflowStatus
     logs: list[str] = Field(default_factory=list)
     report: ThematicScreenerResponse | None = None
+
+
+class EtfExposureRequest(BaseModel):
+    """Body for server-side ETF asset-exposure aggregation (FMP key stays on server)."""
+
+    theme_scoring: dict[str, Any] = Field(
+        ...,
+        description="Same shape as report.theme_scoring: company name -> scoring object with ticker, composite_score.",
+    )
+    top_n: int = Field(..., ge=1, le=50, description="How many top-scored companies to include from theme_scoring.")
+    top_k: int = Field(..., ge=1, le=50, description="Max ETFs to return after ranking.")
+    extra_tickers: list[str] = Field(
+        default_factory=list,
+        description="Symbols in the Tickers box (comma/space separated). Meaning depends on tickers_mode.",
+    )
+    tickers_mode: TickersBasketMode = Field(
+        default=TickersBasketMode.merge,
+        description="merge: top_n from theme_scoring plus Tickers. only: basket is only Tickers (top_n ignored).",
+    )
+    etf_symbols_filter: list[str] | None = Field(
+        default=None,
+        description=(
+            "If set, only these ETF symbols are analyzed: holdings are fetched per fund and "
+            "theme scores are basket overlap weights (not global ETF discovery)."
+        ),
+    )
+
+
+class EtfExposureItem(BaseModel):
+    etfSymbol: str
+    themeScore: float
+    matchCount: int
+    matchedTickers: list[str]
+    totalTickers: int
+    estAum: float
+    rank: int
+    aliases: list[str] | None = None
+
+
+class EtfExposureResponse(BaseModel):
+    etfs: list[EtfExposureItem]
+    total_tickers_used: int
+    warnings: list[str] = Field(default_factory=list)

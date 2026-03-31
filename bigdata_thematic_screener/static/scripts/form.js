@@ -193,9 +193,9 @@ document.getElementById('screenerForm').onsubmit = async function (e) {
                                 });
                             }
                             
+                            window.lastReport = statusData.report;
                             renderScreenerReport(statusData.report);
                             showJsonBtn.style.display = 'inline-block';
-                            window.lastReport = statusData.report;
                         }
                         spinner.style.display = 'none';
                         submitBtn.disabled = false;

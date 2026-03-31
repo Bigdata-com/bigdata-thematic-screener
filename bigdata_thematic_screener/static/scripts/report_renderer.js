@@ -6,6 +6,7 @@ function renderScreenerReport(data) {
             window.tabController.showEmptyState('companies', 'No data to display');
             window.tabController.showEmptyState('mindmap', 'No data to display');
             window.tabController.showEmptyState('evidence', 'No data to display');
+            window.tabController.showEmptyState('etfs', 'No data to display');
         }
         return;
     }
@@ -54,7 +55,18 @@ function renderScreenerReport(data) {
             window.tabController.setLoadingState('evidence', false);
             renderEvidenceTable(data.content);
         }
+
     } catch (error) {
         console.error('Error rendering report:', error);
+    }
+
+    // ETFs tab - rendered in its own try/catch to avoid being blocked by earlier tab errors
+    try {
+        window.tabController.setLoadingState('etfs', false);
+        if (window.renderEtfTab) {
+            renderEtfTab(data.theme_scoring);
+        }
+    } catch (error) {
+        console.error('Error rendering ETF tab:', error);
     }
 }

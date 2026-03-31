@@ -160,6 +160,13 @@
               </svg>
               Evidence
             </button>
+            <button data-tab="etfs" 
+              class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+              </svg>
+              ETFs
+            </button>
           </div>
         </div>
 
@@ -204,6 +211,17 @@
               <div class="flex items-center justify-center py-20">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                 <span class="ml-3 text-zinc-400">Loading evidence...</span>
+              </div>
+            </div>
+            <div class="tab-actual-content"></div>
+          </div>
+
+          <!-- ETFs Tab -->
+          <div data-tab-content="etfs" class="hidden p-6">
+            <div class="loading-indicator hidden">
+              <div class="flex items-center justify-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <span class="ml-3 text-zinc-400">Loading ETFs...</span>
               </div>
             </div>
             <div class="tab-actual-content"></div>
@@ -510,5 +528,7 @@
 <script src="static/scripts/company_cards.js"></script>
 <script src="static/scripts/mindmap.js"></script>
 <script src="static/scripts/evidence_table.js"></script>
+<script>window.__FMP_ETF_LOOKUP_ENABLED__ = {{ fmp_etf_lookup_enabled | tojson }};</script>
+<script src="static/scripts/etf_tab.js"></script>
 <script src="static/scripts/form.js"></script>
 {% endblock %}
