@@ -4,7 +4,10 @@ from uuid import UUID
 import pandas as pd
 
 from bigdata_thematic_screener import pipeline
-from bigdata_thematic_screener.api.models import ThematicScreenRequestBase, WorkflowStatus
+from bigdata_thematic_screener.api.models import (
+    ThematicScreenRequestBase,
+    WorkflowStatus,
+)
 from bigdata_thematic_screener.api.storage import StorageManager
 from bigdata_thematic_screener.models import ThematicScreenerResponse
 from bigdata_thematic_screener.taxonomy import Node
@@ -66,7 +69,7 @@ def process_request(
     except Exception as e:
         storage_manager.log_message(
             request_id=request_id,
-            message=f"Workflow failed with error: {str(e)}",
+            message=f"Workflow failed with error: {e!s}",
         )
         storage_manager.update_status(request_id, WorkflowStatus.FAILED)
         raise e

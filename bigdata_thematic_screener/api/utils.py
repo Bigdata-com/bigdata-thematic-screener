@@ -1,9 +1,7 @@
-from typing import Type
-
 from pydantic import BaseModel
 
 
-def get_example_values_from_schema(schema_model: Type[BaseModel]) -> dict:
+def get_example_values_from_schema(schema_model: type[BaseModel]) -> dict:
     """
     Extract example values from a Pydantic model's fields, falling back to defaults if no example is provided.
     Args:

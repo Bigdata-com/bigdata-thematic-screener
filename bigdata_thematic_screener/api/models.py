@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 from enum import StrEnum
-from typing import Any, List, Optional, Self
+from typing import Any, Self
 
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import ValidationError
@@ -71,7 +71,7 @@ class ThematicScreenRequestBase(BaseModel):
         description="End date of the analysis window (format: YYYY-MM-DD).",
         example=yesterday().isoformat(),
     )
-    keywords: List[str] | None = Field(
+    keywords: list[str] | None = Field(
         default=None,
         description="Key terms to emphasize when generating the theme taxonomy.",
         example=None,
@@ -81,7 +81,7 @@ class ThematicScreenRequestBase(BaseModel):
         description="OpenAI model used for taxonomy generation, chunk labeling, and company summaries.",
         example=DEFAULT_LLM_MODEL,
     )
-    rerank_threshold: Optional[float] = Field(
+    rerank_threshold: float | None = Field(
         default=None,
         description="Optional relevance threshold (0-1); chunks scoring below it are discarded.",
         example=None,
@@ -93,12 +93,12 @@ class ThematicScreenRequestBase(BaseModel):
         description="Fraction (0-1, not a percentage — e.g. 0.05 = 5%) of the estimated available chunks to retrieve per taxonomy leaf. Higher values cost more and take longer.",
         example=DEFAULT_CHUNK_PERCENTAGE,
     )
-    max_leaf_labels: Optional[int] = Field(
+    max_leaf_labels: int | None = Field(
         default=DEFAULT_MAX_LEAF_LABELS,
         description="Maximum number of leaf exposure pathways in the generated theme taxonomy. Use 0 or null for no cap.",
         example=DEFAULT_MAX_LEAF_LABELS,
     )
-    max_taxonomy_depth: Optional[int] = Field(
+    max_taxonomy_depth: int | None = Field(
         default=None,
         ge=2,
         description=(
@@ -176,8 +176,15 @@ class EtfExposureRequest(BaseModel):
         ...,
         description="Same shape as report.theme_scoring: company name -> scoring object with ticker, composite_score.",
     )
-    top_n: int = Field(..., ge=1, le=50, description="How many top-scored companies to include from theme_scoring.")
-    top_k: int = Field(..., ge=1, le=50, description="Max ETFs to return after ranking.")
+    top_n: int = Field(
+        ...,
+        ge=1,
+        le=50,
+        description="How many top-scored companies to include from theme_scoring.",
+    )
+    top_k: int = Field(
+        ..., ge=1, le=50, description="Max ETFs to return after ranking."
+    )
     extra_tickers: list[str] = Field(
         default_factory=list,
         description="Symbols in the Tickers box (comma/space separated). Meaning depends on tickers_mode.",

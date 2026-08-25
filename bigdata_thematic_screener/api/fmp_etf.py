@@ -54,7 +54,9 @@ def resolve_ticker_basket(
             )
             ordered_only = ordered_only[:max_total]
         if not ordered_only:
-            warnings.append("Add at least one symbol in Tickers when using Only this mode.")
+            warnings.append(
+                "Add at least one symbol in Tickers when using Only this mode."
+            )
         return ordered_only, warnings
 
     if not theme_scoring:
@@ -188,9 +190,7 @@ def _parse_holdings_rows(data: Any) -> list[dict[str, Any]]:
         mv = float(item.get("marketValue") or 0)
         if not sym or wp <= 0 or wp > 100:
             continue
-        items.append(
-            {"equitySymbol": sym, "weightPercentage": wp, "marketValue": mv}
-        )
+        items.append({"equitySymbol": sym, "weightPercentage": wp, "marketValue": mv})
     deduped: dict[str, dict[str, Any]] = {}
     for it in items:
         es = it["equitySymbol"]
@@ -275,11 +275,15 @@ def run_focus_etf_holdings_pipeline(
             holdings = []
         row = build_focus_etf_row_from_holdings(etf_sym, holdings, basket)
         if row["themeScore"] > MAX_THEME_CONCENTRATION_PCT:
-            warnings.append(f"Excluded {row['etfSymbol']}: theme concentration over 100%.")
+            warnings.append(
+                f"Excluded {row['etfSymbol']}: theme concentration over 100%."
+            )
             continue
         estimates = row.get("_aum_estimates") or []
         if len(estimates) >= 2 and not _is_aum_consistent(estimates):
-            warnings.append(f"Excluded {row['etfSymbol']}: inconsistent AUM from holdings.")
+            warnings.append(
+                f"Excluded {row['etfSymbol']}: inconsistent AUM from holdings."
+            )
             continue
         row.pop("_aum_estimates", None)
         rows.append(row)

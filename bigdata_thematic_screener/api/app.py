@@ -38,7 +38,11 @@ from bigdata_thematic_screener.models import ThematicScreenerResponse
 from bigdata_thematic_screener.service import process_request
 from bigdata_thematic_screener.settings import settings
 from bigdata_thematic_screener.templates import loader
-from bigdata_thematic_screener.universe import build_universe_from_ids, load_universe_csv
+from bigdata_thematic_screener.universe import (
+    WATCHLIST_REJECTED_MESSAGE,
+    build_universe_from_ids,
+    load_universe_csv,
+)
 
 engine = create_engine(settings.DB_STRING, echo=LOG_LEVEL == "DEBUG")
 
@@ -105,7 +109,9 @@ def etf_exposure(
         tickers_mode=body.tickers_mode,
     )
     items = [EtfExposureItem(**e) for e in raw_etfs]
-    return EtfExposureResponse(etfs=items, total_tickers_used=total_used, warnings=warnings)
+    return EtfExposureResponse(
+        etfs=items, total_tickers_used=total_used, warnings=warnings
+    )
 
 
 @app.get(
@@ -171,8 +177,13 @@ def screen_companies(
     `companies` must be a list of RavenPack entity IDs. Watchlists are not supported; upload
     a CSV via `/thematic-screener/upload` for larger or metadata-rich universes.
     """
+    companies = request.companies
+    if isinstance(companies, str):
+        raise HTTPException(status_code=400, detail=WATCHLIST_REJECTED_MESSAGE)
     try:
-        universe_df = build_universe_from_ids(request.companies, api_key=settings.BIGDATA_API_KEY)
+        universe_df = build_universe_from_ids(
+            companies, api_key=settings.BIGDATA_API_KEY
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -186,9 +197,15 @@ def screen_companies(
 )
 def screen_companies_upload(
     background_tasks: BackgroundTasks,
-    file: Annotated[UploadFile, File(description="Universe CSV with RP_ENTITY_ID + COMPANY_NAME columns.")],
+    file: Annotated[
+        UploadFile,
+        File(description="Universe CSV with RP_ENTITY_ID + COMPANY_NAME columns."),
+    ],
     request: Annotated[
-        str, Form(description="JSON-encoded request body (same fields as POST /thematic-screener, minus companies).")
+        str,
+        Form(
+            description="JSON-encoded request body (same fields as POST /thematic-screener, minus companies)."
+        ),
     ],
     storage_manager: StorageManager = Depends(get_storage_manager),
     _: str = Security(query_scheme),
@@ -207,7 +224,9 @@ def screen_companies_upload(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    return _queue_screening(parsed_request, universe_df, background_tasks, storage_manager)
+    return _queue_screening(
+        parsed_request, universe_df, background_tasks, storage_manager
+    )
 
 
 @app.get(

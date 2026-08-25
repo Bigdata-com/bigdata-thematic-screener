@@ -14,10 +14,19 @@ def test_build_theme_scoring_zero_fills_every_leaf_label():
         ]
     )
     universe_df = pd.DataFrame(
-        [{"RP_ENTITY_ID": "AAAAAA", "COMPANY_NAME": "A", "TICKER": "T1", "INDUSTRY": "I1"}]
+        [
+            {
+                "RP_ENTITY_ID": "AAAAAA",
+                "COMPANY_NAME": "A",
+                "TICKER": "T1",
+                "INDUSTRY": "I1",
+            }
+        ]
     )
 
-    scoring = build_theme_scoring(screener_df, universe_df, all_labels=["Leaf One", "Leaf Two"])
+    scoring = build_theme_scoring(
+        screener_df, universe_df, all_labels=["Leaf One", "Leaf Two"]
+    )
 
     assert scoring["A"]["themes"] == {"Leaf One": 1, "Leaf Two": 0}
     assert scoring["A"]["composite_score"] == 1
@@ -70,5 +79,7 @@ def test_company_evidence_block_includes_materiality_revenue_cost():
 
 
 def test_company_evidence_block_skips_rows_without_motivation():
-    rows = pd.DataFrame([{"materiality": "high", "label": "Leaf One", "motivation": ""}])
+    rows = pd.DataFrame(
+        [{"materiality": "high", "label": "Leaf One", "motivation": ""}]
+    )
     assert _company_evidence_block(rows) == ""
