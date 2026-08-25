@@ -37,6 +37,10 @@
       class="px-6 py-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg font-medium transition-colors shadow-lg">
       JSON
     </button>
+    <button id="exportExcelBtn" onclick="exportToExcel()" style="display:none;"
+      class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+      Excel
+    </button>
     <button id="newAnalysisBtn" onclick="resetToStart()" style="display:none;"
       class="flex items-center justify-center p-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg transition-colors shadow-lg"
       title="Start New Analysis">
@@ -297,18 +301,26 @@
 
       <!-- Company Universe -->
       <div class="mb-4">
-        <label for="companies" class="block mb-2 font-medium text-sm text-white">
+        <label for="companies_text" class="block mb-2 font-medium text-sm text-white">
           <span>Company Universe</span>
           <button type="button" class="text-blue-400 text-xs ml-1" onclick="showInfoModal('companies')" title="Info">ⓘ</button>
         </label>
-        <div class="relative">
-          <input id="companies_text" type="text"
-            class="absolute w-[calc(100%-20px)] bg-zinc-900 text-white text-sm rounded-lg block p-3 h-[46px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-          <select id="companies"
-            class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-3 h-[46px] z-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-            onchange="this.previousElementSibling.value=this.options[this.selectedIndex].text;">
+        <input id="companies_text" type="text" placeholder="Comma-separated RP entity IDs, e.g. D8442A, 228D42, 4A6F00"
+          class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-3 h-[46px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        <div class="mt-2">
+          <select id="companies_example"
+            class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 cursor-pointer"
+            onchange="if (this.value) { document.getElementById('companies_text').value = this.value; document.getElementById('companies_file').value = ''; }">
+            <option value="">Quick fill: example universe...</option>
           </select>
         </div>
+        <div class="mt-2">
+          <label for="companies_file" class="block mb-1 text-xs text-zinc-400">...or upload a CSV (RP_ENTITY_ID, COMPANY_NAME, optionally TICKER/SECTOR/INDUSTRY/COUNTRY)</label>
+          <input id="companies_file" type="file" accept=".csv"
+            class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 cursor-pointer"
+            onchange="if (this.files[0]) { document.getElementById('companies_text').value = ''; }" />
+        </div>
+        <p class="text-xs text-zinc-500 mt-1">Watchlists are not supported at this time.</p>
       </div>
 
       <!-- Advanced Options Toggle -->
@@ -339,15 +351,10 @@
         
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="frequency" class="block mb-2 font-medium text-xs text-zinc-400">Frequency</label>
-            <select id="frequency"
-              class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 focus:ring-2 focus:ring-blue-500 cursor-pointer">
-              <option value="D" {% if frequency=='D' %}selected{% endif %}>Daily</option>
-              <option value="W" {% if frequency=='W' %}selected{% endif %}>Weekly</option>
-              <option value="M" {% if frequency=='M' %}selected{% endif %}>Monthly</option>
-              <option value="3M" {% if frequency=='3M' %}selected{% endif %}>Quarterly</option>
-              <option value="Y" {% if frequency=='Y' %}selected{% endif %}>Yearly</option>
-            </select>
+            <label for="chunk_percentage" class="block mb-2 font-medium text-xs text-zinc-400">Retrieval %</label>
+            <input type="number" id="chunk_percentage"
+              class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 focus:ring-2 focus:ring-blue-500"
+              value="{{ (chunk_percentage * 100) | round(2) }}" max="100" min="0" step="0.5">
           </div>
           <div>
             <label for="rerank_threshold" class="block mb-2 font-medium text-xs text-zinc-400">Rerank (0-1)</label>
@@ -357,33 +364,25 @@
               max="1" min="0" step="0.01">
           </div>
         </div>
-        
+
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="document_limit" class="block mb-2 font-medium text-xs text-zinc-400">Doc Limit</label>
-            <input type="number" id="document_limit"
+            <label for="max_leaf_labels" class="block mb-2 font-medium text-xs text-zinc-400">Max Themes</label>
+            <input type="number" id="max_leaf_labels"
               class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 focus:ring-2 focus:ring-blue-500"
-              value="{{ document_limit }}" />
+              value="{{ max_leaf_labels }}" min="0" />
           </div>
           <div>
-            <label for="batch_size" class="block mb-2 font-medium text-xs text-zinc-400">Batch Size</label>
-            <input type="number" id="batch_size"
+            <label for="max_taxonomy_depth" class="block mb-2 font-medium text-xs text-zinc-400">Max Taxonomy Depth</label>
+            <input type="number" id="max_taxonomy_depth"
               class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 focus:ring-2 focus:ring-blue-500"
-              value="{{ batch_size }}" />
+              value="{{ max_taxonomy_depth if max_taxonomy_depth is defined and max_taxonomy_depth is not none else '' }}"
+              min="2" placeholder="Default" />
           </div>
         </div>
-        
+
         <!-- Hidden fields -->
-        <input type="text" id="fiscal_year" class="hidden"
-          value="{% if fiscal_year %}{% if fiscal_year is iterable and fiscal_year is not string %}{{ fiscal_year|join(', ') }}{% else %}{{ fiscal_year }}{% endif %}{% endif %}" />
         <input type="text" id="llm_model" class="hidden" value="{{ llm_model }}" />
-        <select id="document_type" class="hidden">
-          <option value="all" {% if document_type=='all' %}selected{% endif %}>ALL</option>
-          <option value="filings" {% if document_type=='filings' %}selected{% endif %}>FILINGS</option>
-          <option value="transcripts" {% if document_type=='transcripts' %}selected{% endif %}>TRANSCRIPTS</option>
-          <option value="news" {% if document_type=='news' %}selected{% endif %}>NEWS</option>
-          <option value="files" {% if document_type=='files' %}selected{% endif %}>FILES</option>
-        </select>
       </div>
 
       <!-- Action Buttons -->
@@ -471,23 +470,16 @@
 </div>
 
 <script>
-  const watchlists = {{ example_watchlists | tojson }};
+  const exampleCompanies = {{ example_companies | tojson }};
 
-  // Populate the dropdown with watchlists
-  const comp_select = document.getElementById('companies');
-  const comp_text = document.getElementById('companies_text');
-  watchlists.forEach((watchlist, index) => {
-    if (watchlist.id === "{{ companies }}") {
-      comp_text.value = watchlist.name;
-    }
+  // Populate the "quick fill" dropdown with example company universes
+  const comp_example_select = document.getElementById('companies_example');
+  Object.entries(exampleCompanies).forEach(([name, ids]) => {
     const option = document.createElement('option');
-    option.value = watchlist.id;
-    option.textContent = watchlist.name;
-    comp_select.appendChild(option);
+    option.value = ids.join(', ');
+    option.textContent = name;
+    comp_example_select.appendChild(option);
   });
-  
-  // Make watchlists globally available
-  window.watchlists = watchlists;
 
   document.getElementById('showJsonBtn').onclick = function () {
     if (lastReport) {
@@ -521,14 +513,15 @@
     }
   });
 </script>
-<script src="static/scripts/config_panel.js"></script>
-<script src="static/scripts/dashboard_cards.js"></script>
-<script src="static/scripts/tab_controller.js"></script>
-<script src="static/scripts/heatmap.js"></script>
-<script src="static/scripts/company_cards.js"></script>
-<script src="static/scripts/mindmap.js"></script>
-<script src="static/scripts/evidence_table.js"></script>
+<script src="static/scripts/config_panel.js?version={{version}}"></script>
+<script src="static/scripts/dashboard_cards.js?version={{version}}"></script>
+<script src="static/scripts/tab_controller.js?version={{version}}"></script>
+<script src="static/scripts/heatmap.js?version={{version}}"></script>
+<script src="static/scripts/company_cards.js?version={{version}}"></script>
+<script src="static/scripts/mindmap.js?version={{version}}"></script>
+<script src="static/scripts/excel_export.js?version={{version}}"></script>
+<script src="static/scripts/evidence_table.js?version={{version}}"></script>
 <script>window.__FMP_ETF_LOOKUP_ENABLED__ = {{ fmp_etf_lookup_enabled | tojson }};</script>
-<script src="static/scripts/etf_tab.js"></script>
-<script src="static/scripts/form.js"></script>
+<script src="static/scripts/etf_tab.js?version={{version}}"></script>
+<script src="static/scripts/form.js?version={{version}}"></script>
 {% endblock %}

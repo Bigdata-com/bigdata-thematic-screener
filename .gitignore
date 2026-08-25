@@ -13,3 +13,4 @@ __pycache__/
 coverage-reports/
 .coverage
 .vscode/
+uv.lock

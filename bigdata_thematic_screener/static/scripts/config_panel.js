@@ -98,10 +98,12 @@ function loadQuickStartTemplate(type) {
                     });
                 }
                 
-                // Show JSON button
+                // Show JSON and Export Excel buttons
                 const showJsonBtn = document.getElementById('showJsonBtn');
                 if (showJsonBtn) showJsonBtn.style.display = 'inline-block';
-                
+                const exportExcelBtn = document.getElementById('exportExcelBtn');
+                if (exportExcelBtn) exportExcelBtn.style.display = 'inline-block';
+
                 // Show new analysis button
                 const newAnalysisBtn = document.getElementById('newAnalysisBtn');
                 if (newAnalysisBtn) newAnalysisBtn.style.display = 'inline-flex';

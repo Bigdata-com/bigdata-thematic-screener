@@ -1,6 +1,6 @@
 
 # Bigdata Thematic Screener Service
-This repository contains a Python package and Docker image for running a thematic screener service using Bigdata.com SDK. The service analyzes corporate exposure to specific themes and events, quantifying the impact for each company in your universe. See our [docs](https://docs.bigdata.com/use-cases/docker-services/thematic-screener) for more details.
+This repository contains a Python package and Docker image for running a thematic screener service on top of the Bigdata.com REST API. The service analyzes corporate exposure to specific themes and events, quantifying the impact for each company in your universe. See our [docs](https://docs.bigdata.com/use-cases/docker-services/thematic-screener) for more details.
 
 # What does it do?
 The thematic screener service allows you to analyze and quantify how companies are exposed to a given theme (e.g., supply chain reshaping, AI adoption, geopolitical events). It screens your trading universe and provides a detailed breakdown of theme scores, labeled content, and taxonomy.
@@ -60,7 +60,9 @@ We perform a pre-release security scan on our container images to detect vulnera
 
 ## How to screen a set of companies?
 
-A thematic screener report provides an executive summary of financially relevant information about a set of companies that form your watchlist. You can generate a report either using the UI or programmatically, allowing you to build custom workflows on top of this service.
+A thematic screener report provides an executive summary of financially relevant information about a set of companies in your universe. You can generate a report either using the UI or programmatically, allowing you to build custom workflows on top of this service.
+
+The company universe is provided either as a list of RavenPack (RP) entity IDs, or as an uploaded CSV. **Watchlists (watchlist IDs) are not supported.**
 
 ### Using the UI
 There is a simple UI available @ `http://localhost:8000/` where you can set your parameters and receive an easy-to-read summary of the thematic screening results.
@@ -74,9 +76,12 @@ After a thematic report is available (the run produced **theme scoring** for you
 
 ### Programmatically
 
-You can generate a report for a universe of companies by sending a POST request to the `/thematic-screener` endpoint with the required parameters. The service now works asynchronously - you'll receive a `request_id` immediately, and the analysis will run in the background.
+The thematic screener API works asynchronously. You first submit a request to start the analysis, then check the status periodically until completion.
 
-#### Step 1: Start the analysis
+#### Step 1: Submit a Thematic Screener Request
+
+**Option A — a list of RP entity IDs**, via `POST /thematic-screener`:
+
 ```bash
 curl -X 'POST' \
   'http://localhost:8000/thematic-screener' \
@@ -85,16 +90,25 @@ curl -X 'POST' \
   -d '{
     "theme": "Supply Chain Reshaping",
     "focus": "Logistics",
-    "companies": "44118802-9104-4265-b97a-2e6d88d74893",
+    "companies": ["D8442A", "228D42", "4A6F00"],
     "start_date": "2024-01-01",
     "end_date": "2025-08-26",
-    "fiscal_year": 2024,
-    "document_type": "TRANSCRIPTS",
-    "frequency": "M"
+    "chunk_percentage": 0.05,
+    "max_leaf_labels": 15
   }'
 ```
 
-This will return a response like:
+**Option B — a universe CSV**, via `POST /thematic-screener/upload` (multipart, same fields minus `companies`, sent as a JSON string in the `request` form field). The CSV needs `RP_ENTITY_ID` (alias `RP_COMPANY_ID`) and `COMPANY_NAME` columns; `TICKER`/`SECTOR`/`INDUSTRY`/`COUNTRY` are optional enrichment columns:
+
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/thematic-screener/upload' \
+  -H 'accept: application/json' \
+  -F 'file=@Internal/mag7.csv;type=text/csv' \
+  -F 'request={"theme": "AI Adoption and Monetization", "focus": "How major tech companies are monetizing AI products and services.", "start_date": "2024-01-01", "end_date": "2025-08-26"};type=application/json'
+```
+
+Both endpoints return a response like:
 ```json
 {
   "request_id": "12345678-1234-1234-1234-123456789abc",
