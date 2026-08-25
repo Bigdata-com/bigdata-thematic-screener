@@ -20,7 +20,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v6
       - name: Install dependencies
-        run: uv sync --locked --dev
+        run: uv sync --dev
       - name: Type check the code
         run: make type-check
       - name: Lint the code
@@ -45,7 +45,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
       - name: Install dependencies
-        run: uv sync --locked --dev
+        run: uv sync --dev
       - name: Create coverage output directory
         run: mkdir -p coverage-reports
       - name: Test with pytest
