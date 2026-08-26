@@ -64,9 +64,9 @@ def extract_sentences(
 ) -> list[dict[str, Any]]:
     """Flatten retrieved documents into per-chunk sentence records.
 
-    Each chunk becomes a sentence with a resolved ``company_name`` (looked up
-    from the universe DataFrame). Chunks whose ``relevance`` is below
-    ``rerank_threshold`` are dropped.
+    Each matching universe company on a chunk becomes its own sentence (a
+    chunk mentioning several basket companies is attributed to all of them).
+    Chunks whose ``relevance`` is below ``rerank_threshold`` are dropped.
     """
     id_to_name = dict(zip(universe_df[ID_COLUMN], universe_df[NAME_COLUMN]))
 
@@ -88,23 +88,27 @@ def extract_sentences(
             entity_ids = chunk.get("entity_ids") or []
             if not entity_ids:
                 continue
-            first_entity = entity_ids[0]
-            company_name = id_to_name.get(first_entity)
-            if not company_name:
-                continue
 
-            sentences.append(
-                {
-                    "sentence_id": idx,
-                    "text": chunk.get("text"),
-                    "document_id": document_id,
-                    "headline": headline,
-                    "timestamp": timestamp,
-                    "relevance": relevance,
-                    "company_name": company_name,
-                }
-            )
-            idx += 1
+            seen_entity_ids: set[str] = set()
+            for entity_id in entity_ids:
+                if entity_id in seen_entity_ids:
+                    continue
+                seen_entity_ids.add(entity_id)
+                company_name = id_to_name.get(entity_id)
+                if not company_name:
+                    continue
+                sentences.append(
+                    {
+                        "sentence_id": idx,
+                        "text": chunk.get("text"),
+                        "document_id": document_id,
+                        "headline": headline,
+                        "timestamp": timestamp,
+                        "relevance": relevance,
+                        "company_name": company_name,
+                    }
+                )
+                idx += 1
 
     logger.info(
         "Extracted %d sentences from %d documents", len(sentences), len(documents)

@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
@@ -41,6 +42,20 @@ UNCLEAR_LABEL = "unclear"
 MAX_MOTIVATIONS_CHARS = 120_000
 
 
+@dataclass(slots=True, frozen=True)
+class LabelingResult:
+    """Parsed per-sentence labels plus counts of requests that never produced a payload."""
+
+    parsed: dict[str, dict[str, Any]]
+    request_count: int
+    api_failures: int
+    parse_failures: int
+
+    @property
+    def failed_count(self) -> int:
+        return self.api_failures + self.parse_failures
+
+
 class CompanySummary(BaseModel):
     summary: str
 
@@ -57,7 +72,7 @@ def label_sentences(
     root: Node,
     model: str,
     client: OpenAI | None = None,
-) -> dict[str, dict[str, str]]:
+) -> LabelingResult:
     """Label each sentence with a taxonomy leaf (or ``unclear``) via the LLM.
 
     Unlike the risk-analyzer variant, the thematic-mode prompt also asks for
@@ -66,7 +81,9 @@ def label_sentences(
     of the final ``content`` chunks.
     """
     if not sentences:
-        return {}
+        return LabelingResult(
+            parsed={}, request_count=0, api_failures=0, parse_failures=0
+        )
 
     labels = taxonomy.get_leaf_labels(root)
     system_prompt = taxonomy.SYSTEM_PROMPT_LABELING.format(
@@ -96,9 +113,12 @@ def label_sentences(
 
     responses = run_chat_requests_parallel(requests, client=client)
 
-    parsed: dict[str, dict[str, str]] = {}
+    parsed: dict[str, dict[str, Any]] = {}
+    api_failures = 0
+    parse_failures = 0
     for response in responses:
         if not response.succeeded or not response.content:
+            api_failures += 1
             logger.warning(
                 "Labeling request %s failed: %s", response.request_id, response.error
             )
@@ -106,8 +126,16 @@ def label_sentences(
         try:
             payload = json.loads(response.content)
         except json.JSONDecodeError:
+            parse_failures += 1
             logger.warning(
                 "Could not parse labeling response for %s", response.request_id
+            )
+            continue
+
+        if not isinstance(payload, dict):
+            parse_failures += 1
+            logger.warning(
+                "Labeling response for %s was not a JSON object", response.request_id
             )
             continue
 
@@ -115,16 +143,29 @@ def label_sentences(
             parsed[response.request_id] = payload
             continue
         # The model sometimes wraps the fields under the sentence_id key.
+        matched = False
         for sentence_id, fields in payload.items():
             if isinstance(fields, dict) and {"motivation", "label"}.issubset(fields):
                 parsed[str(sentence_id)] = fields
+                matched = True
+        if not matched:
+            parse_failures += 1
+            logger.warning(
+                "Labeling response for %s was missing motivation/label fields",
+                response.request_id,
+            )
 
-    return parsed
+    return LabelingResult(
+        parsed=parsed,
+        request_count=len(requests),
+        api_failures=api_failures,
+        parse_failures=parse_failures,
+    )
 
 
 def build_labeled_dataframe(
     sentences: list[dict[str, Any]],
-    parsed_responses: dict[str, dict[str, str]],
+    parsed_responses: dict[str, dict[str, Any]],
 ) -> pd.DataFrame:
     """Merge sentences with their labels and drop unclear/unlabeled rows."""
     if not sentences:
@@ -461,9 +502,17 @@ def run_thematic_screening(
     on_progress(
         f"Labelling {len(sentences)} chunks with {len(leaf_search_queries)} themes"
     )
-    parsed_responses = label_sentences(sentences, main_theme, focus, root, model=model)
-    merged_df = build_labeled_dataframe(sentences, parsed_responses)
-    on_progress(f"Labeling completed. {len(merged_df)} chunks labeled with themes.")
+    labeling = label_sentences(sentences, main_theme, focus, root, model=model)
+    merged_df = build_labeled_dataframe(sentences, labeling.parsed)
+    on_progress(
+        f"Labeling completed. {len(merged_df)} chunks labeled with themes. "
+        f"{labeling.failed_count} of {labeling.request_count} labeling requests failed."
+    )
+    if labeling.request_count > 0 and not labeling.parsed:
+        raise RuntimeError(
+            f"Labeling failed for all {labeling.request_count} chunks; "
+            "cannot build a thematic screen."
+        )
 
     on_progress("Post-processing results")
     company_summaries_df = summarize_companies(merged_df, main_theme, model=model)
