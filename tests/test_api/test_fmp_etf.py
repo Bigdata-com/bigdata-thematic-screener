@@ -2,15 +2,15 @@
 
 from bigdata_thematic_screener.api.fmp_etf import (
     MAX_BASKET_TICKERS,
+    _holding_equity_symbol,
+    _parse_fmp_rows,
+    _parse_holdings_rows,
     aggregate_etf_exposure,
     apply_etf_symbol_filter,
     build_focus_etf_row_from_holdings,
     normalize_focus_etf_list,
     normalize_symbol,
     resolve_ticker_basket,
-    _holding_equity_symbol,
-    _parse_fmp_rows,
-    _parse_holdings_rows,
 )
 from bigdata_thematic_screener.api.models import TickersBasketMode
 
@@ -108,10 +108,30 @@ def test_aggregate_etf_exposure_min_match_and_aum() -> None:
 
 def test_aggregate_excludes_theme_score_over_100_percent() -> None:
     ticker_results = [
-        {"ticker": "A", "exposures": [{"etfSymbol": "HOT", "weightPercentage": 55, "marketValue": 2e10}]},
-        {"ticker": "B", "exposures": [{"etfSymbol": "HOT", "weightPercentage": 60, "marketValue": 2e10}]},
-        {"ticker": "C", "exposures": [{"etfSymbol": "OK", "weightPercentage": 6, "marketValue": 1e10}]},
-        {"ticker": "D", "exposures": [{"etfSymbol": "OK", "weightPercentage": 7, "marketValue": 1e10}]},
+        {
+            "ticker": "A",
+            "exposures": [
+                {"etfSymbol": "HOT", "weightPercentage": 55, "marketValue": 2e10}
+            ],
+        },
+        {
+            "ticker": "B",
+            "exposures": [
+                {"etfSymbol": "HOT", "weightPercentage": 60, "marketValue": 2e10}
+            ],
+        },
+        {
+            "ticker": "C",
+            "exposures": [
+                {"etfSymbol": "OK", "weightPercentage": 6, "marketValue": 1e10}
+            ],
+        },
+        {
+            "ticker": "D",
+            "exposures": [
+                {"etfSymbol": "OK", "weightPercentage": 7, "marketValue": 1e10}
+            ],
+        },
     ]
     etfs = aggregate_etf_exposure(ticker_results, min_match_count=2)
     symbols = {e["etfSymbol"] for e in etfs}
@@ -158,7 +178,9 @@ def test_parse_holdings_rows_fmp_stable_uses_asset_not_fund_symbol() -> None:
 
 
 def test_holding_equity_symbol_precedence() -> None:
-    assert _holding_equity_symbol({"asset": "X", "symbol": "FUND", "ticker": "T"}) == "X"
+    assert (
+        _holding_equity_symbol({"asset": "X", "symbol": "FUND", "ticker": "T"}) == "X"
+    )
     assert _holding_equity_symbol({"symbol": "QQQ", "weightPercentage": 1}) == "QQQ"
 
 

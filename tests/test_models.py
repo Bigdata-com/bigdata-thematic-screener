@@ -1,15 +1,11 @@
 import pytest
 from pydantic import ValidationError
 
-from bigdata_thematic_screener.api.models import (
-    DocumentType,
-    FrequencyEnum,
-    ThematicScreenRequest,
-)
+from bigdata_thematic_screener.api.models import ThematicScreenRequest
 
 
 @pytest.mark.parametrize(
-    "theme,companies,start_date,end_date,llm_model,fiscal_year,document_type,rerank_threshold,frequency,document_limit,batch_size,expected_error",
+    "theme,companies,start_date,end_date,expected_error",
     [
         # Missing companies
         (
@@ -17,13 +13,6 @@ from bigdata_thematic_screener.api.models import (
             None,
             "2025-06-01",
             "2025-08-01",
-            "openai::gpt-4o-mini",
-            None,
-            DocumentType.NEWS,
-            None,
-            FrequencyEnum.monthly,
-            100,
-            10,
             "Input should be a valid",
         ),
         # start_date after end_date
@@ -32,60 +21,20 @@ from bigdata_thematic_screener.api.models import (
             ["4A6F00"],
             "2025-08-01",
             "2025-06-01",
-            "openai::gpt-4o-mini",
-            2025,
-            DocumentType.TRANSCRIPTS,
-            None,
-            FrequencyEnum.monthly,
-            100,
-            10,
-            "The number of days in the range between start_date",
+            "Invalid date format or range",
         ),
-        # Frequency interval too large for date range
+        # Bare-string companies (legacy watchlist ID) is rejected
         (
             "US Import Tariffs against China",
-            ["4A6F00"],
-            "2025-08-01",
-            "2025-08-10",
-            "openai::gpt-4o-mini",
-            2025,
-            DocumentType.TRANSCRIPTS,
-            None,
-            FrequencyEnum.monthly,
-            100,
-            10,
-            "The number of days in the range between start_date",
-        ),
-        # Invalid frequency value
-        (
-            "US Import Tariffs against China",
-            ["4A6F00"],
+            "44118802-9104-4265-b97a-2e6d88d74893",
             "2025-06-01",
             "2025-08-01",
-            "openai::gpt-4o-mini",
-            2025,
-            DocumentType.TRANSCRIPTS,
-            None,
-            "invalid_freq",
-            100,
-            10,
-            "invalid_freq",
+            "Watchlist is not supported",
         ),
     ],
 )
 def test_thematic_screen_request_model_invalid(
-    theme,
-    companies,
-    start_date,
-    end_date,
-    llm_model,
-    fiscal_year,
-    document_type,
-    rerank_threshold,
-    frequency,
-    document_limit,
-    batch_size,
-    expected_error,
+    theme, companies, start_date, end_date, expected_error
 ):
     with pytest.raises((ValidationError, ValueError)) as exc_info:
         ThematicScreenRequest(
@@ -93,141 +42,77 @@ def test_thematic_screen_request_model_invalid(
             companies=companies,
             start_date=start_date,
             end_date=end_date,
-            llm_model=llm_model,
-            fiscal_year=fiscal_year,
-            document_type=document_type,
-            rerank_threshold=rerank_threshold,
-            frequency=frequency,
-            document_limit=document_limit,
-            batch_size=batch_size,
         )
     assert expected_error in str(exc_info.value)
 
 
 @pytest.mark.parametrize(
-    "theme,companies,start_date,end_date,llm_model,fiscal_year,document_type,rerank_threshold,frequency,document_limit,batch_size",
+    "theme,focus,companies,start_date,end_date,keywords,llm_model,rerank_threshold,chunk_percentage,max_leaf_labels,max_taxonomy_depth",
     [
-        # Minimal valid input with companies
         (
             "US Import Tariffs against China",
+            "Logistics automation",
             ["4A6F00", "D8442A"],
             "2025-06-01",
             "2025-08-01",
-            "openai::gpt-4o-mini",
-            2025,
-            DocumentType.TRANSCRIPTS,
+            ["Tariffs"],
+            "gpt-5.6-luna",
             None,
-            FrequencyEnum.monthly,
-            100,
-            10,
+            0.02,
+            15,
+            None,
         ),
-        # Minimal valid input with watchlist_id
         (
-            "US Import Tariffs against China",
-            "44118802-9104-4265-b97a-2e6d88d74893",
-            "2025-06-01",
-            "2025-08-01",
-            "openai::gpt-4o-mini",
-            2025,
-            DocumentType.TRANSCRIPTS,
+            "Supply Chain Reshaping",
+            None,
+            ["A12345"],
+            "2025-01-01",
+            "2025-12-31",
+            None,
+            "gpt-5.6-luna",
             0.8,
-            FrequencyEnum.weekly,
-            50,
-            5,
-        ),
-        # Different frequency and document type
-        (
-            "Supply Chain Reshaping",
-            ["A12345"],
-            "2025-01-01",
-            "2025-12-31",
-            "openai::gpt-4o-mini",
-            2025,
-            DocumentType.TRANSCRIPTS,
+            0.5,
             None,
-            FrequencyEnum.yearly,
-            200,
-            20,
-        ),
-        # Only one fiscal year but as a list
-        (
-            "Supply Chain Reshaping",
-            ["A12345"],
-            "2025-01-01",
-            "2025-12-31",
-            "openai::gpt-4o-mini",
-            [2025],
-            DocumentType.TRANSCRIPTS,
-            None,
-            FrequencyEnum.yearly,
-            200,
-            20,
-        ),
-        # Multiple fiscal years
-        (
-            "Supply Chain Reshaping",
-            ["A12345"],
-            "2025-01-01",
-            "2025-12-31",
-            "openai::gpt-4o-mini",
-            [2025, 2026, 2027],
-            DocumentType.TRANSCRIPTS,
-            None,
-            FrequencyEnum.yearly,
-            200,
-            20,
-        ),
-        # Control entities with multiple places
-        (
-            "Supply Chain Reshaping",
-            ["B67890"],
-            "2025-07-01",
-            "2025-08-01",
-            "openai::gpt-4o-mini",
-            2025,
-            DocumentType.TRANSCRIPTS,
-            None,
-            FrequencyEnum.daily,
-            10,
-            1,
+            3,
         ),
     ],
 )
 def test_thematic_screen_request_model(
     theme,
+    focus,
     companies,
     start_date,
     end_date,
+    keywords,
     llm_model,
-    fiscal_year,
-    document_type,
     rerank_threshold,
-    frequency,
-    document_limit,
-    batch_size,
+    chunk_percentage,
+    max_leaf_labels,
+    max_taxonomy_depth,
 ):
     req = ThematicScreenRequest(
         theme=theme,
+        focus=focus,
         companies=companies,
         start_date=start_date,
         end_date=end_date,
+        keywords=keywords,
         llm_model=llm_model,
-        fiscal_year=fiscal_year,
-        document_type=document_type,
         rerank_threshold=rerank_threshold,
-        frequency=frequency,
-        document_limit=document_limit,
-        batch_size=batch_size,
+        chunk_percentage=chunk_percentage,
+        max_leaf_labels=max_leaf_labels,
+        max_taxonomy_depth=max_taxonomy_depth,
     )
     assert req.theme == theme
+    assert req.focus == focus
     assert req.start_date == start_date
     assert req.end_date == end_date
     assert req.llm_model == llm_model
-    assert req.document_type == document_type
-    assert req.frequency == frequency
-    assert req.document_limit == document_limit
-    assert req.batch_size == batch_size
-    if companies:
-        assert req.companies == companies
+    assert req.chunk_percentage == chunk_percentage
+    assert req.max_leaf_labels == max_leaf_labels
+    assert req.max_taxonomy_depth == max_taxonomy_depth
+    assert req.companies == companies
+    if keywords:
+        assert req.keywords == keywords
     if rerank_threshold is not None:
         assert req.rerank_threshold == rerank_threshold

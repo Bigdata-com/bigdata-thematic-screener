@@ -1,15 +1,13 @@
 const infoContents = {
     theme: `<b>Theme</b>:<br>The main theme, topic, or trend you want to screen for exposure. It can be specified as a single word or as a short sentence. The Screener will generate a list of sub-themes representing individual, self contained components of the main theme. The theme can contain multiple core concepts, but we would recommend not adding too many core concepts in the same screener run.<br><i>Examples: "Artificial Intelligence", "Supply Chain Reshaping", "Energy Transition"</i>`,
     focus: `<b>Focus</b>:<br> Use this parameter to pass additional, custom instructions to the llm when breaking down the theme into sub-themes. These parameters allow you to guide the mindmap creation and customize it to your needs, as it allows users to inject their own domain knowledge, your specific point of view, and it will ensure that the mindmap will focus on the core concepts required.`,
-    companies: `<b>Company Universe</b>:<br>The portfolio of companies you want to screen for exposure, you have several input options:<br><ul class="list-disc pl-6"><li>Select one of the public watchlists using the dropdown menu</li><li>Write list of RavenPack entity IDs (e.g., <code>4A6F00, D8442A</code>)</li><li>Input a watchlist ID (e.g., <code>44118802-9104-4265-b97a-2e6d88d74893</code> )</li></ul><br>Watchlists can be created programmatically using the <a href='https://docs.bigdata.com/getting-started/watchlist_management' target='_blank'>Bigdata.com SDK</a> or through the <a href='https://app.bigdata.com/watchlists' target='_blank'>Bigdata app</a>.`,
+    companies: `<b>Company Universe</b>:<br>The portfolio of companies you want to screen for exposure, you have two input options:<br><ul class="list-disc pl-6"><li>Write a comma-separated list of RavenPack entity IDs (e.g., <code>4A6F00, D8442A</code>)</li><li>Upload a CSV with <code>RP_ENTITY_ID</code> and <code>COMPANY_NAME</code> columns (optionally <code>TICKER</code>/<code>SECTOR</code>/<code>INDUSTRY</code>/<code>COUNTRY</code>)</li></ul><br>Watchlists are not supported at this time.`,
     start_date: `<b>Start/End Date</b>:<br>The start and end of the time sample during which you want to screen your portfolio for thematic exposure. Format: <code>YYYY-MM-DD</code>.`,
-    document_type: `<b>Document Type</b>:<br>The type of documents to search over. Use this to analyze text data from news, corporate transcripts, or filings. Currently, only "TRANSCRIPTS" is supported.`,
-    fiscal_year: `<b>Fiscal Year</b>:<br>For Transcripts and Filings, filter documents by their reporting details. <b>fiscal_year</b> represents the annual reporting period and can be combined with <b>start_date</b> and <b>end_date</b> for time-sensitive queries. Not applicable to News.`,
     rerank_threshold: `<b>Rerank Threshold</b>:<br>Optional, used with sentence search only. Ensures close cosine similarity between sentence embeddings and retrieved chunks. By default, not applied. For most use cases, one-step retrieval is sufficient. <a href='https://docs.bigdata.com/how-to-guides/rerank_search' target='_blank'>Learn more</a>.`,
-    frequency: `<b>Frequency</b>:<br>Break down your sample range into higher frequency intervals (<code>D</code>, <code>Y</code>, <code>M</code>, <code>3M</code>, <code>Y</code>). Useful for large samples to control document retrieval over time.`,
+    chunk_percentage: `<b>Retrieval %</b>:<br>Percentage (0-100) of the estimated available chunks to retrieve per theme, e.g. <code>5</code> means 5%. Higher values cost more and take longer, but surface more evidence.`,
+    max_leaf_labels: `<b>Max Themes</b>:<br>Maximum number of leaf sub-themes in the generated theme taxonomy. Leave empty for no cap.`,
+    max_taxonomy_depth: `<b>Max Taxonomy Depth</b>:<br>Maximum number of levels in the generated theme taxonomy, counting the root theme node as level 1. Leave empty for the default depth.`,
     llm_model: `<b>LLM Model</b>:<br>The LLM model to be used for mindmap generation and text analysis. It has to be specified as a string containing both provider name and model name separated by two colons: <provider::model>.`,
-    document_limit: `<b>Document Limit</b>:<br>The maximum number of documents to be retrieved by each query. This is a single value that applies to any combination of query statement & date range.`,
-    batch_size: `<b>Batch Size</b>:<br>Set this parameter when screening a large portfolio of companies (i.e. 50 or more). It allows to break down the portfolio into smaller batches of fixed size, and instructs the search service to run parallel queries for each and every batch. This allows for improving the sampling across your portfolio, given the document limit constraint that has to be applied per query.`,
     headline_comment: `<b>Headline</b>:<br>Click on each headline to retrieve the DOCUMENT ID. The DOCUMENT ID identifies the document that contains that  headline.`
 };
 
@@ -94,10 +92,12 @@ function resetToStart() {
     // Reset config
     window.currentConfig = { theme: '', companies: '' };
     
-    // Hide JSON button
+    // Hide JSON and Export Excel buttons
     const showJsonBtn = document.getElementById('showJsonBtn');
     if (showJsonBtn) showJsonBtn.style.display = 'none';
-    
+    const exportExcelBtn = document.getElementById('exportExcelBtn');
+    if (exportExcelBtn) exportExcelBtn.style.display = 'none';
+
     // Clear report
     window.lastReport = null;
     
@@ -239,10 +239,12 @@ function uploadJson(event) {
             // Render the report
             renderScreenerReport(data);
             
-            // Show JSON button
+            // Show JSON and Export Excel buttons
             const showJsonBtn = document.getElementById('showJsonBtn');
             if (showJsonBtn) showJsonBtn.style.display = 'inline-block';
-            
+            const exportExcelBtn = document.getElementById('exportExcelBtn');
+            if (exportExcelBtn) exportExcelBtn.style.display = 'inline-block';
+
             // Close config panel if open
             if (window.closeConfigPanel) {
                 closeConfigPanel();

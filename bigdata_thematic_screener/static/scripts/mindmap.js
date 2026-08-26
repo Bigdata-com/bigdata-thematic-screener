@@ -7,6 +7,13 @@ function renderMindmap(taxonomy) {
     if (!container || !taxonomy) return;
 
     mindmapData = taxonomy;
+    // Always start a freshly-rendered report in Tree View. Graph View's D3 layout
+    // needs the container's real on-screen width, which isn't available yet here
+    // (the Taxonomy tab is hidden until the user clicks it) — rendering the graph
+    // while hidden bakes in a wrong, clamped-fallback size that then sticks around
+    // (see switchMindmapView's re-render-on-switch below for why it doesn't self-heal
+    // on its own).
+    currentMindmapView = 'tree';
 
     let html = `
         <div class="mb-6">
@@ -54,11 +61,11 @@ function renderMindmap(taxonomy) {
 
 function switchMindmapView(view) {
     currentMindmapView = view;
-    
+
     // Update button styles
     const treeBtn = document.getElementById('viewTree');
     const graphBtn = document.getElementById('viewGraph');
-    
+
     if (view === 'tree') {
         treeBtn.classList.add('bg-blue-500', 'text-white');
         treeBtn.classList.remove('text-zinc-400', 'hover:text-zinc-200');
@@ -70,11 +77,11 @@ function switchMindmapView(view) {
         treeBtn.classList.remove('bg-blue-500', 'text-white');
         treeBtn.classList.add('text-zinc-400', 'hover:text-zinc-200');
     }
-    
+
     // Show/hide views
     const treeView = document.getElementById('mindmapTreeView');
     const graphView = document.getElementById('mindmapGraphView');
-    
+
     if (view === 'tree') {
         treeView.classList.remove('hidden');
         graphView.classList.add('hidden');
@@ -84,9 +91,10 @@ function switchMindmapView(view) {
     } else {
         graphView.classList.remove('hidden');
         treeView.classList.add('hidden');
-        if (graphView.innerHTML === '') {
-            renderGraphView(mindmapData);
-        }
+        // Always recompute (not just when empty): the container is only guaranteed
+        // to have a real, visible width right now, at switch time. Re-rendering here
+        // both gets an accurate width and self-heals any earlier bad-width render.
+        renderGraphView(mindmapData);
     }
 }
 
@@ -96,12 +104,12 @@ function renderTreeView(node, depth = 0) {
 
     function buildTreeHTML(node, depth = 0) {
         if (!node) return '';
-        
+
         const hasChildren = node.children && node.children.length > 0;
         const indent = depth * 2;
         const depthColors = ['text-blue-400', 'text-emerald-400', 'text-purple-400', 'text-amber-400', 'text-pink-400'];
         const colorClass = depthColors[depth % depthColors.length];
-        
+
         let html = `
             <div class="tree-node mb-2" style="margin-left: ${indent}rem">
                 <div class="flex items-start gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-${colorClass.split('-')[1]}-500/50 transition-all group">
@@ -128,7 +136,7 @@ function renderTreeView(node, depth = 0) {
                 ${hasChildren ? `<div class="tree-children mt-2">${node.children.map(child => buildTreeHTML(child, depth + 1)).join('')}</div>` : ''}
             </div>
         `;
-        
+
         return html;
     }
 
@@ -142,7 +150,7 @@ function renderTreeView(node, depth = 0) {
 function toggleTreeNode(button) {
     const childrenDiv = button.closest('.tree-node').querySelector('.tree-children');
     const icon = button.querySelector('.expand-icon');
-    
+
     if (childrenDiv) {
         if (childrenDiv.classList.contains('hidden')) {
             childrenDiv.classList.remove('hidden');
@@ -154,9 +162,29 @@ function toggleTreeNode(button) {
     }
 }
 
+function countLeaves(node) {
+    if (!node || !node.children || node.children.length === 0) return 1;
+    return node.children.reduce((sum, child) => sum + countLeaves(child), 0);
+}
+
 function renderGraphView(taxonomy) {
     const container = document.getElementById('mindmapGraphView');
     if (!container || !taxonomy) return;
+
+    if (typeof d3 === 'undefined') {
+        container.innerHTML = `
+            <div class="bg-zinc-800/30 rounded-lg border border-red-700/50 p-6 text-center text-zinc-300">
+                Interactive Graph could not load its charting library (d3.js from a CDN).
+                This is usually caused by a blocked network request — check the
+                browser console, or use Tree View instead.
+            </div>
+        `;
+        return;
+    }
+
+    // Height scales with the number of leaves so large taxonomies don't cram/overlap.
+    const leafCount = countLeaves(taxonomy);
+    const height = Math.max(600, leafCount * 28 + 100);
 
     // Clear and set up SVG container
     container.innerHTML = `
@@ -164,12 +192,13 @@ function renderGraphView(taxonomy) {
             <div class="mb-3 text-sm text-zinc-400 flex items-center gap-4">
                 <span>💡 Scroll to zoom • Hover for details • Tree grows left to right</span>
             </div>
-            <div id="graphSvgContainer" class="bg-zinc-900 rounded overflow-hidden" style="height: 600px;"></div>
+            <div id="graphSvgContainer" class="bg-zinc-900 rounded overflow-hidden overflow-y-auto" style="height: ${Math.min(height, 900)}px;"></div>
         </div>
     `;
 
-    const width = container.offsetWidth - 40;
-    const height = 600;
+    // container.offsetWidth can be 0 if this runs while the tab is still hidden
+    // (display:none) — fall back to a sane default instead of a negative tree size.
+    const width = Math.max(container.offsetWidth - 40, 600);
 
     // Convert taxonomy to D3 hierarchy
     function taxonomyToHierarchy(node) {
@@ -203,7 +232,7 @@ function renderGraphView(taxonomy) {
     // Add zoom behavior
     const g = svg.append('g')
         .attr('transform', 'translate(50, 50)');
-    
+
     svg.call(d3.zoom()
         .scaleExtent([0.1, 4])
         .on('zoom', (event) => {
@@ -249,7 +278,9 @@ function renderGraphView(taxonomy) {
         .attr('fill', '#fff')
         .style('pointer-events', 'none');
 
-    // Tooltip
+    // Tooltip — remove any leftover one from a previous render (renderGraphView can
+    // now run more than once per report, see switchMindmapView) before adding a fresh one.
+    d3.selectAll('.mindmap-tooltip').remove();
     const tooltip = d3.select('body').append('div')
         .attr('class', 'mindmap-tooltip')
         .style('position', 'absolute')
@@ -272,7 +303,7 @@ function renderGraphView(taxonomy) {
         }
         tooltip.html(content)
             .style('visibility', 'visible');
-        
+
         d3.select(this).select('circle')
             .transition()
             .duration(200)

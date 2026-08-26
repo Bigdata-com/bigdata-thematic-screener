@@ -21,6 +21,16 @@
 }
 </style>
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4/dist/exceljs.min.js"></script>
+<script>
+	// Fallback if a CDN fails
+	if (typeof d3 === 'undefined') {
+		console.error('D3.js failed to load. Charts may not work.');
+	}
+	if (typeof ExcelJS === 'undefined') {
+		console.error('ExcelJS failed to load. Excel export will not work.');
+	}
+</script>
 <script src="static/scripts/visualization.js"></script>
 <script src="static/scripts/report_renderer.js"></script>
 <script src="static/scripts/validators.js"></script>

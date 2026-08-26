@@ -1,12 +1,13 @@
 from datetime import date, datetime, timedelta
-from enum import Enum, StrEnum
-from typing import Any, Literal, Optional
+from enum import StrEnum
+from typing import Any, Self
 
-from bigdata_client.models.search import DocumentType
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import ValidationError
 
 from bigdata_thematic_screener.models import ThematicScreenerResponse
+from bigdata_thematic_screener.taxonomy import DEFAULT_MAX_LEAF_LABELS
+from bigdata_thematic_screener.universe import WATCHLIST_REJECTED_MESSAGE
 
 
 def one_year_ago() -> date:
@@ -15,21 +16,6 @@ def one_year_ago() -> date:
 
 def yesterday() -> date:
     return date.today() - timedelta(days=1)
-
-
-def select_fiscal_year() -> list[int]:
-    today = date.today()
-    # Create a fiscal year window from last year to next year
-    fiscal_window = [today.year - 1, today.year, today.year + 1]
-    return fiscal_window
-
-
-class FrequencyEnum(StrEnum):
-    daily = "D"
-    weekly = "W"
-    monthly = "M"
-    quarterly = "3M"
-    yearly = "Y"
 
 
 class WorkflowStatus(StrEnum):
@@ -46,45 +32,25 @@ class TickersBasketMode(StrEnum):
     only = "only"
 
 
-class WatchlistExample(BaseModel):
-    id: str = Field(..., description="The unique identifier for the watchlist.")
-    name: str = Field(..., description="The name of the watchlist.")
+# Example RP entity IDs for the demo UI's "quick fill" dropdown, sourced from
+# Internal/mag7.csv. Watchlists are not supported (see WATCHLIST_REJECTED_MESSAGE).
+EXAMPLE_COMPANY_LISTS: dict[str, list[str]] = {
+    "MAG_7": ["E09E2B", "D8442A", "228D42", "0157B1", "4A6F00", "12E454", "DD3BB1"],
+}
+
+DEFAULT_LLM_MODEL = "gpt-5.6-luna"
+DEFAULT_CHUNK_PERCENTAGE = 0.05
 
 
-class ExampleWatchlists(Enum):
-    TOP_100_UK = WatchlistExample(
-        id="33d6f577-9256-4a53-944f-09127e42fdc2", name="Top 100 UK"
-    )
-    TOP_50_EU = WatchlistExample(
-        id="9baef470-8cf5-46fa-b30a-352bcb35cd94", name="Top 50 Europe"
-    )
-    US_LARGE_CAP_100 = WatchlistExample(
-        id="44118802-9104-4265-b97a-2e6d88d74893", name="Top 100 US"
-    )
-    TOP_40_DE = WatchlistExample(
-        id="8453c26f-47c5-4e78-b5c8-acf245caccad", name="Top 40 Germany"
-    )
-    TOP_40_FR = WatchlistExample(
-        id="9fb6ac2d-a552-4dbb-b62f-8657ef18bf29", name="Top 40 France"
-    )
-    DOW_30 = WatchlistExample(id="5b78837c-343d-4559-8f06-98668b09d1df", name="Dow 30")
-    NASDAQ_100 = WatchlistExample(
-        id="402acbcd-f1d8-4a55-997a-598819be0bbf", name="Nasdaq 100"
-    )
-    MAG_7 = WatchlistExample(
-        id="814d0944-a2c1-44f6-8b42-a70c0795428e", name="Magnificent 7"
-    )
+class ThematicScreenRequestBase(BaseModel):
+    """Shared thematic-screener request fields.
 
-    def __iter__(self):
-        """Allows to create a dict from the enum
-        >>> dict(ExampleWatchlists)
-        {'POINT_72': {'id': '9ab396cf-a2bb-4c91-b9bf-ed737905803e', 'name': 'Point 72 Holdings'}, ...}
-        """
-        yield self.name
-        yield self.value.model_dump()
+    Used directly by the CSV-upload endpoint (whose company universe comes
+    from the uploaded file, not this model) and extended by
+    :class:`ThematicScreenRequest` for the JSON endpoint (which additionally
+    takes a `companies` list of RP entity IDs).
+    """
 
-
-class ThematicScreenRequest(BaseModel):
     theme: str = Field(
         ...,
         example="Supply Chain Reshaping",
@@ -95,77 +61,63 @@ class ThematicScreenRequest(BaseModel):
         description="Specific focus area within the theme.",
         example="Logistics automation, nearshoring strategies, and supply chain digitalization",
     )
-    companies: list[str] | str = Field(
-        ...,
-        description="List of RavenPack entity IDs  or a watchlist ID representing the companies to screen.",
-        example=ExampleWatchlists.US_LARGE_CAP_100.value.id,
-    )
     start_date: str = Field(
-        ...,
+        default="2024-01-01",
         description="Start date of the analysis window (format: YYYY-MM-DD).",
         example=one_year_ago().isoformat(),
     )
     end_date: str = Field(
-        ...,
+        default="2024-12-31",
         description="End date of the analysis window (format: YYYY-MM-DD).",
         example=yesterday().isoformat(),
     )
-    llm_model: str = Field(
-        default="openai::gpt-4o-mini",
-        example="openai::gpt-4o-mini",
-        description="LLM model identifier used for taxonomy creation and semantic analysis.",
-    )
-    fiscal_year: int | list[int] | None = Field(
-        description="If the document type is transcripts or filings, fiscal year needs to be specified.",
-        example=select_fiscal_year(),
-    )
-
-    document_type: Literal[DocumentType.TRANSCRIPTS] = Field(
-        default=DocumentType.TRANSCRIPTS,
-        description="Type of documents to analyze (only transcript supported for now).",
-    )
-    rerank_threshold: Optional[float] = Field(
+    keywords: list[str] | None = Field(
         default=None,
+        description="Key terms to emphasize when generating the theme taxonomy.",
         example=None,
-        description="Optional threshold (0-1) to rerank and filter search results by relevance.",
     )
-    frequency: FrequencyEnum = Field(
-        default=FrequencyEnum.yearly,
-        example=FrequencyEnum.yearly,
-        description="Search frequency interval. Supported values: D (daily), W (weekly), M (monthly), 3M (quarterly), Y (yearly).",
+    llm_model: str = Field(
+        default=DEFAULT_LLM_MODEL,
+        description="OpenAI model used for taxonomy generation, chunk labeling, and company summaries.",
+        example=DEFAULT_LLM_MODEL,
     )
-    document_limit: int = Field(
-        default=100,
-        example=100,
-        description="Maximum number of documents to retrieve per query to Bigdata API.",
+    rerank_threshold: float | None = Field(
+        default=None,
+        description="Optional relevance threshold (0-1); chunks scoring below it are discarded.",
+        example=None,
     )
-    batch_size: int = Field(
-        default=10,
-        example=10,
-        description="Number of entities to include in each batch for parallel querying.",
+    chunk_percentage: float = Field(
+        default=DEFAULT_CHUNK_PERCENTAGE,
+        ge=0.0,
+        le=1.0,
+        description="Fraction (0-1, not a percentage — e.g. 0.05 = 5%) of the estimated available chunks to retrieve per taxonomy leaf. Higher values cost more and take longer.",
+        example=DEFAULT_CHUNK_PERCENTAGE,
+    )
+    max_leaf_labels: int | None = Field(
+        default=DEFAULT_MAX_LEAF_LABELS,
+        description="Maximum number of leaf exposure pathways in the generated theme taxonomy. Use 0 or null for no cap.",
+        example=DEFAULT_MAX_LEAF_LABELS,
+    )
+    max_taxonomy_depth: int | None = Field(
+        default=None,
+        ge=2,
+        description=(
+            "Maximum number of levels in the generated theme taxonomy, counting the root "
+            "theme node as level 1. Defaults to the model's natural structure."
+        ),
+        example=None,
     )
 
     @model_validator(mode="before")
+    @classmethod
     def check_date_range(cls, values):
+        start_date = values.get("start_date", cls.model_fields["start_date"].default)
+        end_date = values.get("end_date", cls.model_fields["end_date"].default)
         try:
-            start_date = values["start_date"]
-            end_date = values["end_date"]
             if (
                 start_date > end_date
             ):  # We can compare directly as they are both ISO format strings
-                raise ValidationError.from_exception_data(
-                    title=cls.__name__,
-                    line_errors=[
-                        {
-                            "type": "value_error",
-                            "loc": ("start_date", "end_date"),
-                            "input": values,
-                            "ctx": {
-                                "error": "start_date must be earlier than end_date"
-                            },
-                        }
-                    ],
-                )
+                raise ValueError("start_date must be earlier than end_date")
         except Exception as e:
             raise ValidationError.from_exception_data(
                 title=cls.__name__,
@@ -174,124 +126,28 @@ class ThematicScreenRequest(BaseModel):
                         "type": "value_error",
                         "loc": ("start_date", "end_date"),
                         "ctx": {"error": f"Invalid date format or range: {e}"},
-                        "input": values,
-                    }
-                ],
-            )
-        return values
-
-    @model_validator(mode="before")
-    def check_fiscal_year_when_transcript_or_filing(cls, values):
-        doc_type = values.get("document_type", None)
-        if doc_type is None:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("document_type",),
-                        "input": values,
-                        "ctx": {"error": "document_type must be specified."},
-                    }
-                ],
-            )
-        if doc_type.upper() not in DocumentType.__members__:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("document_type",),
-                        "input": values,
-                        "ctx": {
-                            "error": f"Invalid document_type: {doc_type}, possible values are: {list(DocumentType.__members__.keys())}"
-                        },
-                    }
-                ],
-            )
-        doc_type = DocumentType[doc_type.upper()]
-        if doc_type in [
-            DocumentType.TRANSCRIPTS,
-            DocumentType.FILINGS,
-        ] and not values.get("fiscal_year"):
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("fiscal_year",),
-                        "input": values,
-                        "ctx": {
-                            "error": "fiscal_year must be specified when document_type is TRANSCRIPT or FILING."
-                        },
-                    }
-                ],
-            )
-        elif (
-            doc_type
-            and doc_type
-            not in [
-                DocumentType.TRANSCRIPTS,
-                DocumentType.FILINGS,
-            ]
-            and values.get("fiscal_year") is not None
-        ):
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("fiscal_year",),
-                        "ctx": {
-                            "error": "fiscal_year must not be specified when document_type is not TRANSCRIPT or FILING."
-                        },
-                        "input": values,
-                    }
-                ],
-            )
-        return values
-
-    @model_validator(mode="before")
-    def check_frequency_vs_date_range(cls, values):
-        start_date = values["start_date"]
-        end_date = values["end_date"]
-        freq = values.get("frequency")
-        delta_days = (
-            datetime.fromisoformat(end_date) - datetime.fromisoformat(start_date)
-        ).days + 1  # Adjust for inclusive range
-        freq_min_days = {"D": 1, "W": 7, "M": 30, "3M": 90, "Y": 365}
-        if isinstance(freq, str):
-            freq = FrequencyEnum(freq)
-        if not isinstance(freq, FrequencyEnum):
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("frequency",),
-                        "ctx": {"error": f"Invalid frequency: {freq}"},
-                        "input": {"frequency": freq},
-                    }
-                ],
-            )
-        if delta_days < freq_min_days[freq.value]:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("start_date", "end_date"),
-                        "ctx": {
-                            "error": f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
-                        },
                         "input": {
-                            "start_date": values["start_date"],
-                            "end_date": values["end_date"],
+                            "start_date": start_date,
+                            "end_date": end_date,
                         },
                     }
                 ],
             )
         return values
+
+
+class ThematicScreenRequest(ThematicScreenRequestBase):
+    companies: list[str] | str = Field(
+        ...,
+        description="List of RavenPack entity IDs representing the companies to screen. Watchlists are not supported.",
+        example=EXAMPLE_COMPANY_LISTS["MAG_7"],
+    )
+
+    @model_validator(mode="after")
+    def reject_watchlist(self) -> Self:
+        if isinstance(self.companies, str):
+            raise ValueError(WATCHLIST_REJECTED_MESSAGE)
+        return self
 
 
 class ThematicScreenerAcceptedResponse(BaseModel):
@@ -307,6 +163,12 @@ class ThematicScreenerStatusResponse(BaseModel):
     report: ThematicScreenerResponse | None = None
 
 
+# ---------------------------------------------------------------------------
+# ETF exposure feature (FMP-based; no Bigdata SDK dependency, untouched by
+# the SDK-to-REST migration).
+# ---------------------------------------------------------------------------
+
+
 class EtfExposureRequest(BaseModel):
     """Body for server-side ETF asset-exposure aggregation (FMP key stays on server)."""
 
@@ -314,8 +176,15 @@ class EtfExposureRequest(BaseModel):
         ...,
         description="Same shape as report.theme_scoring: company name -> scoring object with ticker, composite_score.",
     )
-    top_n: int = Field(..., ge=1, le=50, description="How many top-scored companies to include from theme_scoring.")
-    top_k: int = Field(..., ge=1, le=50, description="Max ETFs to return after ranking.")
+    top_n: int = Field(
+        ...,
+        ge=1,
+        le=50,
+        description="How many top-scored companies to include from theme_scoring.",
+    )
+    top_k: int = Field(
+        ..., ge=1, le=50, description="Max ETFs to return after ranking."
+    )
     extra_tickers: list[str] = Field(
         default_factory=list,
         description="Symbols in the Tickers box (comma/space separated). Meaning depends on tickers_mode.",
