@@ -14,6 +14,8 @@ from threading import Lock
 
 from openai import OpenAI
 
+from bigdata_thematic_screener.settings import UNSET, settings
+
 DEFAULT_MAX_CONCURRENT_REQUESTS = 20
 DEFAULT_MAX_RETRIES = 5
 DEFAULT_RETRY_BACKOFF_SECONDS = 1.0
@@ -39,6 +41,20 @@ class ChatResponse:
     succeeded: bool
     content: str | None = None
     error: str | None = None
+
+
+def build_client() -> OpenAI:
+    """Build an OpenAI client from the app settings.
+
+    A bare ``OpenAI()`` only reads ``os.environ``, which misses a key supplied
+    through the project's ``.env`` file (pydantic-settings loads it into
+    :class:`Settings`, not into the process environment).
+    """
+    if settings.OPENAI_API_KEY == UNSET:
+        raise ValueError(
+            "OPENAI_API_KEY is not configured. Set it in the environment or in .env."
+        )
+    return OpenAI(api_key=settings.OPENAI_API_KEY)
 
 
 def _call_with_retries(
@@ -80,7 +96,7 @@ def run_chat_requests_parallel(
     if not requests:
         return []
 
-    openai_client = client if client is not None else OpenAI()
+    openai_client = client if client is not None else build_client()
     responses: list[ChatResponse] = []
     responses_lock = Lock()
 
